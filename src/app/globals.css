@@ -1,0 +1,152 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: var(--primary);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-surface: var(--surface);
+
+  --shadow-glass: 0 8px 32px 0 rgba(30, 41, 59, 0.08);
+  --shadow-primary-glow: 0 8px 25px var(--primary-glow);
+}
+
+@layer base {
+  :root {
+    --background: #F8FAFC;
+    --foreground: #1E293B;
+    --card: #FFFFFF;
+    --surface: rgba(255, 255, 255, 0.75);
+
+    /* Default: Indigo */
+    --primary: #6366F1;
+    --primary-glow: rgba(99, 102, 241, 0.3);
+  }
+
+  /* --- Color Palettes --- */
+  [data-theme='indigo'] {
+    --primary: #6366F1;
+    --primary-glow: rgba(99, 102, 241, 0.15);
+  }
+
+  [data-theme='rose'] {
+    --primary: #FB7185;
+    --primary-glow: rgba(251, 113, 133, 0.15);
+  }
+
+  [data-theme='emerald'] {
+    --primary: #10B981;
+    --primary-glow: rgba(16, 185, 129, 0.15);
+  }
+
+  [data-theme='amber'] {
+    --primary: #F59E0B;
+    --primary-glow: rgba(245, 158, 11, 0.15);
+  }
+
+  [data-theme='slate'] {
+    --primary: #475569;
+    --primary-glow: rgba(71, 85, 105, 0.15);
+  }
+
+  [data-theme='violet'] {
+    --primary: #8B5CF6;
+    --primary-glow: rgba(139, 92, 246, 0.15);
+  }
+
+  /* --- Dark Mode Overrides --- */
+  .dark {
+    --background: #0A0F1E;
+    /* Deeper contrast */
+    --foreground: #F1F5F9;
+    --card: #161E31;
+    /* Slightly lighter than bg for elevation */
+    --surface: rgba(22, 30, 49, 0.85);
+
+    /* Adjusted Primary for Dark - More vibrant/readable */
+    &[data-theme='indigo'] {
+      --primary: #818CF8;
+    }
+
+    &[data-theme='rose'] {
+      --primary: #F472B6;
+    }
+
+    &[data-theme='emerald'] {
+      --primary: #34D399;
+    }
+
+    &[data-theme='amber'] {
+      --primary: #FBBF24;
+    }
+
+    &[data-theme='slate'] {
+      --primary: #94A3B8;
+    }
+
+    &[data-theme='violet'] {
+      --primary: #A78BFA;
+    }
+
+    /* Enhance typography weight for dark mode readability */
+    font-weight: 500;
+  }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
+    @apply transition-colors duration-300;
+  }
+
+  html,
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: 'Heebo', 'Assistant', sans-serif;
+    overflow-x: hidden;
+    width: 100%;
+    min-height: 100vh;
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: var(--surface);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow-glass);
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, var(--primary), #8B5CF6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Custom Animations for Login/Onboarding */
+  @keyframes blob {
+    0% {
+      transform: translate(0px, 0px) scale(1);
+    }
+
+    33% {
+      transform: translate(30px, -50px) scale(1.1);
+    }
+
+    66% {
+      transform: translate(-20px, 20px) scale(0.9);
+    }
+
+    100% {
+      transform: translate(0px, 0px) scale(1);
+    }
+  }
+
+  .animate-blob {
+    animation: blob 7s infinite;
+  }
+
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+}

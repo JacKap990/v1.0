@@ -1,0 +1,234 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// We use SQLite for the MVP, which can easily be swapped to PostgreSQL later via database_url.
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// --- NextAuth Core Models ---
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  profileImage  String?   // User-uploaded base64 string or URL
+  password      String?   // Hashed password for credentials login
+  
+  // AI Feature Flags
+  aiVisionEnabled Boolean   @default(true)
+  aiRecommendationsEnabled Boolean @default(true)
+  aiAutoPilot     Boolean   @default(false)
+  dataCollection  Boolean   @default(true)
+  autoRestock     Boolean   @default(true)
+  
+  // Account Preferences (Real Settings)
+  familySize    Int      @default(1)
+  dietaryTags   String?  // JSON string e.g., '["vegan", "kosher"]'
+  themePref     String   @default("system") // light, dark, system
+  colorTheme    String   @default("indigo") // indigo, rose, emerald, amber, slate, violet
+  displayDensity String   @default("comfortable") // comfortable, compact
+  language      String   @default("he") // he, en
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  
+  // App Relationships
+  inventoryItems      InventoryItem[]
+  shoppingLists       ShoppingList[]
+  recipes             Recipe[]
+  favoriteRecipes     UserFavoriteRecipe[]
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  
+  access_token       String?  
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model PasswordResetToken {
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+// --- App Domain Models ---
+
+model InventoryItem {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name         String
+  barcode      String?
+  category     String?
+  quantity     Float    @default(1)
+  unit         String   @default("יחידות")
+  emoji        String?
+  imageUrl     String?  // Scanned or fallback image
+  manufacturer String?
+  brand        String?
+  kosher       String?
+  packWeight   Float?
+  packUnit     String?
+  baseProductName String?
+  
+  minQuantity  Float    @default(1)
+  consumptionRate Int   @default(7) // Days between refills
+  
+  expiryDate   DateTime?
+  addedAt      DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  @@index([userId])
+}
+
+model ShoppingList {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name         String
+  type         String   @default("home") // home, work, party
+  icon         String   @default("🛒")
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  items        ShoppingListItem[]
+  
+  @@index([userId])
+}
+
+model ShoppingListItem {
+  id             String   @id @default(cuid())
+  shoppingListId String
+  shoppingList   ShoppingList @relation(fields: [shoppingListId], references: [id], onDelete: Cascade)
+  
+  name           String
+  barcode        String?
+  category       String?
+  quantity       Float    @default(1)
+  unit           String   @default("יחידות")
+  isChecked      Boolean  @default(false)
+  emoji          String?
+  imageUrl       String?
+  manufacturer   String?
+  brand          String?
+  kosher         String?
+  packWeight     Float?
+  packUnit       String?
+  baseProductName String?
+  expiryDate     DateTime?
+  
+  addedAt        DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  @@index([shoppingListId])
+}
+
+// --- Global Catalog Models (Data Migration) ---
+
+model GlobalProduct {
+  id           String   @id // barcode or custom ID
+  name         String
+  category     String?
+  image        String?
+  remoteImage  String?
+  unit         String?
+  packWeight   Float?
+  packUnit     String?
+  manufacturer String?
+  brand        String?
+  kosher       String?
+  link         String?
+  emoji        String?
+  baseProductName String?
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([name])
+}
+
+model Recipe {
+  id           String   @id @default(cuid())
+  userId       String?  // Null means it's a global system recipe
+  user         User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isPrivate    Boolean  @default(false)
+  originalId   String?  // If it was forked from a system recipe
+  
+  name         String
+  description  String?
+  emoji        String?
+  image        String?  // URL
+  time         String?
+  difficulty   String?
+  servings     Int      @default(4) // Baseline servings for the math engine
+  
+  // Stored as JSON strings
+  tags         String?  // e.g., '["breakfast", "vegetarian", "kosher"]'
+  ingredients  String?  // JSON array of objects: { name, amount, unit }
+  instructions String?  // JSON array of strings: step-by-step
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  favoritedBy  UserFavoriteRecipe[]
+  
+  @@index([userId])
+}
+
+model UserFavoriteRecipe {
+  id        String   @id @default(cuid())
+  userId    String
+  recipeId  String
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  
+  addedAt   DateTime @default(now())
+
+  @@unique([userId, recipeId])
+}
