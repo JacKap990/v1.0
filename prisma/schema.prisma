@@ -5,10 +5,10 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// We use SQLite for the MVP, which can easily be swapped to PostgreSQL later via database_url.
+// We use PostgreSQL for cloud deployment (via Neon, Supabase, etc).
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 // --- NextAuth Core Models ---
