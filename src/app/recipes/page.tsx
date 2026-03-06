@@ -1,4 +1,3 @@
-export const runtime = 'edge';
 import { getRecipes, getUserFavorites } from "@/app/actions/recipes";
 import { getInventory } from "@/app/actions/inventory";
 import { Sparkles, Plus } from "lucide-react";
