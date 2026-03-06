@@ -1,3 +1,4 @@
+export const runtime = 'edge';
 "use client";
 
 import { useSession } from "next-auth/react";

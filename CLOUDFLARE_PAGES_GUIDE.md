@@ -32,6 +32,7 @@ npm install -D @cloudflare/next-on-pages eslint-plugin-next-on-pages
    - **Build output directory**: `.vercel/output/static`
 
 7. הגדר משתני סביבה (Environment variables) ב-Cloudflare (תחת הגדרות הפרויקט) עם ה-`DATABASE_URL` החדש שלך ומפתחות ה-AI/Auth (Google Gemini, NextAuth Secret וכו').
-8. לחץ על **Save and Deploy**.
+8. **חשוב מאוד: דגל תאימות (Compatibility flags)** - רד מעט למטה באותו מסך ל-Compatibility flags, הוסף דגל חדש והקלד: `nodejs_compat`. זה קריטי כדי ש-Prisma ו-NextAuth יעבדו ללא תקלות.
+9. לחץ על **Save and Deploy**.
 
 Cloudflare ייקח את הקוד מה-Git, יבנה אותו, ויעניק לך כתובת URL ציבורית ברגע שהוא יסיים!
