@@ -19,13 +19,6 @@ Cloudflare Pages מריץ קוד בענן ואין לו "כונן קשיח" קב
 npm install -D @cloudflare/next-on-pages eslint-plugin-next-on-pages
 ```
 
-בקובץ `package.json`, עדכן את סקריפט הבנייה:
-```json
-"scripts": {
-  "build": "npx @cloudflare/next-on-pages"
-}
-```
-
 ## שלב 3: חיבור החשבון והעלאה במערכת Cloudflare
 
 1. היכנס לחשבון שלך ב-[Cloudflare Dashboard](https://dash.cloudflare.com).
