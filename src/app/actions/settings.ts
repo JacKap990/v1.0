@@ -1,12 +1,11 @@
 "use server";
 
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/authOptions";
+import { auth } from "../../../auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
 export async function getUserSettings() {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     const userId = (session?.user as any)?.id;
     if (!userId) return null;
 
@@ -49,7 +48,7 @@ export async function updateUserSettings(data: {
     profileImage?: string;
     language?: string;
 }) {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     const userId = (session?.user as any)?.id;
     if (!userId) return { success: false, error: "Not authenticated" };
 

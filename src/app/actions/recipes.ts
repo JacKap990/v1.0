@@ -1,8 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/authOptions";
+import { auth } from "../../../auth";
 import { getUserId } from "@/lib/auth/serverAuth";
 
 export async function getRecipes() {
@@ -67,7 +66,7 @@ export async function getUserFavorites() {
             include: { recipe: true },
             orderBy: { addedAt: "desc" }
         });
-        return favorites.map(f => f.recipe);
+        return favorites.map((f: any) => f.recipe);
     } catch (error) {
         console.error("Failed to fetch favorites:", error);
         return [];

@@ -1,13 +1,14 @@
+export const runtime = 'edge';
 import { getRecipes, getUserFavorites } from "@/app/actions/recipes";
 import { getInventory } from "@/app/actions/inventory";
 import { Sparkles, Plus } from "lucide-react";
 import { RecipeList } from "@/components/RecipeList";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/authOptions";
+import { auth } from "../../../auth";
+
 import { FAB } from "@/components/ui/FAB";
 
 export default async function RecipesPage() {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     const user = session?.user as any;
     const userId = user?.id || null;
 

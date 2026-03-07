@@ -1,4 +1,6 @@
 "use client";
+export const runtime = 'edge';
+
 
 import { useTheme } from "@/components/ThemeProvider";
 import { useState, useEffect } from "react";

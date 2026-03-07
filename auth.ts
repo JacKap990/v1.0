@@ -1,11 +1,13 @@
-export const runtime = 'edge';
-import { NextAuthOptions } from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
-import { prisma } from "../prisma";
+import NextAuth from "next-auth"
+import Credentials from "next-auth/providers/credentials"
+import { PrismaAdapter } from "@auth/prisma-adapter"
+import { prisma } from "./src/lib/prisma"
 
-export const authOptions: NextAuthOptions = {
+export const { handlers, auth, signIn, signOut } = NextAuth({
+    adapter: PrismaAdapter(prisma),
+    session: { strategy: "jwt" },
     providers: [
-        CredentialsProvider({
+        Credentials({
             name: "Credentials",
             credentials: {
                 email: { label: "Email", type: "email", placeholder: "test@example.com" },
@@ -16,11 +18,11 @@ export const authOptions: NextAuthOptions = {
                     throw new Error("Missing credentials");
                 }
 
-                // Special auto-setup for guest user
+                // Guest Logic
                 if (credentials.email === "guest@pantry.com" && credentials.password === "guest123") {
                     const guestUser = await prisma.user.upsert({
                         where: { email: "guest@pantry.com" },
-                        update: {}, // Do nothing if exists
+                        update: {},
                         create: {
                             email: "guest@pantry.com",
                             password: "guest123",
@@ -29,43 +31,29 @@ export const authOptions: NextAuthOptions = {
                             colorTheme: "indigo",
                         } as any
                     });
-                    return {
-                        id: guestUser.id,
-                        email: guestUser.email,
-                        name: guestUser.name,
-                    };
+                    return guestUser;
                 }
 
-                // Find User
                 const user = await prisma.user.findUnique({
-                    where: { email: credentials.email }
+                    where: { email: credentials.email as string }
                 });
 
                 if (!user || !user.password) {
                     throw new Error("Invalid credentials");
                 }
 
-                // Basic plain text check for MVP (Should be bcrypt in production)
                 const isPasswordValid = credentials.password === user.password;
 
                 if (!isPasswordValid) {
                     throw new Error("Invalid credentials");
                 }
 
-                // Return standard NextAuth user object
-                return {
-                    id: user.id,
-                    email: user.email,
-                    name: user.name,
-                };
+                return user;
             }
         })
     ],
-    session: {
-        strategy: "jwt",
-    },
     pages: {
-        signIn: '/login', // Redirect here if auth is required
+        signIn: '/login',
     },
     callbacks: {
         async jwt({ token, user }) {
@@ -82,4 +70,4 @@ export const authOptions: NextAuthOptions = {
         }
     },
     secret: process.env.NEXTAUTH_SECRET || "fallback_secret_for_development_only",
-};
+})
