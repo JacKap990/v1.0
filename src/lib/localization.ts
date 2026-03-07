@@ -4,7 +4,7 @@
 export const CATEGORY_MAP: Record<string, string> = {
     'Dairy': 'מוצרי חלב',
     'dairy': 'מוצרי חלב',
-    'Vegetables': 'يرקות',
+    'Vegetables': 'ירקות',
     'vegetables': 'ירקות',
     'Fruits': 'פירות',
     'fruits': 'פירות',

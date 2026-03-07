@@ -181,6 +181,12 @@ export function normalizeProductData(name: string, qty: number, unit: string) {
             // 1L Tomato -> 1KG Tomato
             normalizedQty = (qty < 5) ? qty : qty / 1000; // If 1000ml -> 1kg
             normalizedUnit = "קג";
+        } else if (u.includes('גרם') || u.includes('gram')) {
+            if (qty >= 1000) {
+                // 3000g -> 3kg
+                normalizedQty = qty / 1000;
+                normalizedUnit = "קג";
+            }
         }
     }
 
