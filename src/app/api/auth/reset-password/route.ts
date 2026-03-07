@@ -1,7 +1,6 @@
 export const runtime = 'edge';
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import crypto from "crypto";
 
 export async function POST(req: Request) {
     try {
@@ -20,8 +19,10 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: true, message: "If an account exists, a reset link has been sent." }, { status: 200 });
         }
 
-        // Generate a secure token
-        const token = crypto.randomBytes(32).toString("hex");
+        // Generate a secure token using WebCrypto
+        const array = new Uint8Array(32);
+        crypto.getRandomValues(array);
+        const token = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
         const expires = new Date(Date.now() + 1000 * 60 * 60); // 1 hour expiration
 
         // Save token to DB
@@ -31,9 +32,8 @@ export async function POST(req: Request) {
             create: { email, token, expires }
         });
 
-        // In a real application, you would send an email here using a service like Resend or SendGrid.
+        // In a real application, you would send an email here.
         // For development/MVP purposes, we will log the reset link to the console.
-
         const resetLink = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/reset-password?token=${token}`;
 
         console.log("-----------------------------------------");
