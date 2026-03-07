@@ -7,7 +7,9 @@ import { useRouter } from "next/navigation";
 import { Html5Qrcode } from "html5-qrcode";
 import { Scan, X, PackageOpen, Plus, Loader2, BrainCircuit } from "lucide-react";
 import { GlassCard } from "@/components/ui/GlassCard";
-import { ReceiptScannerModal } from "@/components/ReceiptScannerModal";
+import dynamic from "next/dynamic";
+const ReceiptScannerModal = dynamic(() => import("@/components/ReceiptScannerModal").then(mod => mod.ReceiptScannerModal), { ssr: false });
+
 import { addItemToInventory } from "@/app/actions/inventory";
 import { getShoppingLists, addShoppingListItem } from "@/app/actions/lists";
 

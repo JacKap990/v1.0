@@ -13,13 +13,15 @@ import { updateInventoryItemFull, deleteMultipleInventoryItems } from "@/app/act
 import { getShoppingLists, addShoppingListItem, addItemToDefaultList } from "@/app/actions/lists";
 import { enrichMissingMetadata } from "@/app/actions/enrichment";
 import { ProductSearchModal } from "@/components/ProductSearchModal";
-import { ProductDetailModal } from "@/components/ProductDetailModal";
+import dynamic from "next/dynamic";
+const ProductDetailModal = dynamic(() => import("@/components/ProductDetailModal").then(mod => mod.ProductDetailModal), { ssr: false });
+
 import { useToast } from "@/components/ui/Toast";
 import { BulkActionBar } from "@/components/BulkActionBar";
 import { SwipeableCard } from "@/components/SwipeableCard";
 import { differenceInDays } from "date-fns";
 import { getUnitLabel, estimateConversion } from "@/lib/unitConversion";
-import { SmartQtyModal } from "../../components/SmartQtyModal";
+const SmartQtyModal = dynamic(() => import("../../components/SmartQtyModal").then(mod => mod.SmartQtyModal), { ssr: false });
 import { InventoryItemCard } from "@/components/InventoryItemCard";
 import { InventorySkeleton } from "@/components/ui/Skeletons";
 import { smartSearch, smartSearchScore } from "@/lib/searchUtils";

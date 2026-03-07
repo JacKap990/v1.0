@@ -3,6 +3,7 @@
 import { auth } from "../../../auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 
 export async function getUserSettings() {
     const session = await auth();
@@ -57,6 +58,15 @@ export async function updateUserSettings(data: {
             where: { id: userId },
             data
         });
+
+        // Set cookies for lightweight layout access
+        const cookieStore = await cookies();
+        if (data.themePref) cookieStore.set("pantry-theme", data.themePref, { maxAge: 60 * 60 * 24 * 365 });
+        if (data.colorTheme) cookieStore.set("pantry-color", data.colorTheme, { maxAge: 60 * 60 * 24 * 365 });
+        if (data.displayDensity) cookieStore.set("pantry-density", data.displayDensity, { maxAge: 60 * 60 * 24 * 365 });
+        if (data.language) cookieStore.set("pantry-lang", data.language, { maxAge: 60 * 60 * 24 * 365 });
+        if (data.profileImage) cookieStore.set("pantry-profile", data.profileImage, { maxAge: 60 * 60 * 24 * 365 });
+
         revalidatePath("/settings");
         revalidatePath("/");
         return { success: true };

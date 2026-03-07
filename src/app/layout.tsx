@@ -7,9 +7,9 @@ import { Header } from "@/components/Header";
 import { ToastProvider } from "@/components/ui/Toast";
 import { MainLayoutWrapper } from "@/components/MainLayoutWrapper";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-
-import { getUserSettings } from "@/app/actions/settings";
+import { cookies } from "next/headers";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { LanguageProvider } from "@/components/LanguageProvider";
 
 const heebo = Heebo({
   variable: "--font-heebo",
@@ -27,15 +27,18 @@ export const metadata: Metadata = {
   description: "ניהול מצרכים מתקדם ומבוסס בינה מלאכותית",
 };
 
-import { LanguageProvider } from "@/components/LanguageProvider";
-
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const settings = await getUserSettings() as any;
-  const lang = settings?.language || "he";
+  const cookieStore = await cookies();
+  const lang = cookieStore.get("pantry-lang")?.value || "he";
+  const theme = cookieStore.get("pantry-theme")?.value || "system";
+  const color = cookieStore.get("pantry-color")?.value || "indigo";
+  const density = cookieStore.get("pantry-density")?.value || "comfortable";
+  const profileImage = cookieStore.get("pantry-profile")?.value || null;
+
   const dir = lang === "en" ? "ltr" : "rtl";
 
   return (
@@ -46,13 +49,13 @@ export default async function RootLayout({
         <NextAuthProvider>
           <LanguageProvider initialLanguage={lang}>
             <ThemeProvider
-              initialTheme={settings?.themePref || "system"}
-              initialColor={settings?.colorTheme || "indigo"}
-              initialDensity={settings?.displayDensity || "comfortable"}
+              initialTheme={theme as any}
+              initialColor={color as any}
+              initialDensity={density as any}
             >
               <ToastProvider>
                 <ErrorBoundary>
-                  <MainLayoutWrapper profileImage={settings?.profileImage}>
+                  <MainLayoutWrapper profileImage={profileImage}>
                     {children}
                   </MainLayoutWrapper>
                 </ErrorBoundary>

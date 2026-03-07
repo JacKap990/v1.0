@@ -3,10 +3,12 @@
 import { usePathname } from "next/navigation";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
-import { OnboardingTour } from "@/components/OnboardingTour";
-import { AIChatPanel } from "@/components/AIChatPanel";
 import { useState, useEffect } from "react";
 import { Sparkles } from "lucide-react";
+import dynamic from "next/dynamic";
+
+const OnboardingTour = dynamic(() => import("@/components/OnboardingTour").then(mod => mod.OnboardingTour), { ssr: false });
+const AIChatPanel = dynamic(() => import("@/components/AIChatPanel").then(mod => mod.AIChatPanel), { ssr: false });
 
 export function MainLayoutWrapper({ children, profileImage }: { children: React.ReactNode, profileImage?: string | null }) {
     const pathname = usePathname();
