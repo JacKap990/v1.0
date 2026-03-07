@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { getUserId } from "@/lib/auth/serverAuth";
 
@@ -17,7 +17,7 @@ export async function updateShoppingListItemFull(
     try {
         const userId = await getUserId();
 
-        await prisma.shoppingListItem.update({
+        await db.shoppingListItem.update({
             where: { id: id },
             data: {
                 name: data.name,
@@ -40,12 +40,12 @@ export async function deleteMultipleShoppingListItems(ids: string[]) {
     try {
         const userId = await getUserId();
 
-        await prisma.shoppingListItem.deleteMany({
+        await db.shoppingListItem.deleteMany({
             where: {
                 id: { in: ids },
                 shoppingList: {
                     userId: userId
-                }
+                } as any
             }
         });
 
@@ -62,7 +62,7 @@ export async function duplicateShoppingList(listId: string) {
         const userId = await getUserId();
 
         // 1. Fetch original list + items
-        const original = await prisma.shoppingList.findUnique({
+        const original = await db.shoppingList.findUnique({
             where: { id: listId, userId: userId },
             include: { items: true }
         });
@@ -70,14 +70,14 @@ export async function duplicateShoppingList(listId: string) {
         if (!original) return { success: false, error: "List not found" };
 
         // 2. Create the copy
-        await prisma.shoppingList.create({
+        await db.shoppingList.create({
             data: {
                 userId: userId,
-                name: `${original.name} (העתק)`,
-                type: original.type,
-                icon: original.icon,
+                name: `${(original as any).name} (העתק)`,
+                type: (original as any).type,
+                icon: (original as any).icon,
                 items: {
-                    create: original.items.map((item: any) => ({
+                    create: (original as any).items.map((item: any) => ({
                         name: item.name,
                         barcode: item.barcode,
                         category: item.category,

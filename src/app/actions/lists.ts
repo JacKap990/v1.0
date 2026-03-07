@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { getUserId } from "@/lib/auth/serverAuth";
 import { calculateSmartExpiry } from "@/lib/smartEngine";
@@ -11,7 +11,7 @@ export async function getShoppingLists() {
         const userId = await getUserId();
         await ensureDefaultLists(userId); // Ensure user has basic lists
 
-        const lists = await prisma.shoppingList.findMany({
+        const lists = await db.shoppingList.findMany({
             where: { userId },
             include: {
                 _count: {
@@ -25,7 +25,7 @@ export async function getShoppingLists() {
         });
 
         // Map to UI friendly
-        return lists.map(list => ({
+        return lists.map((list: any) => ({
             ...list,
             totalCount: list._count.items,
             checkedCount: list.items.length
@@ -39,7 +39,7 @@ export async function getShoppingLists() {
 export async function createShoppingList(name: string, icon: string = "🛒") {
     try {
         const userId = await getUserId();
-        const list = await prisma.shoppingList.create({
+        const list = await db.shoppingList.create({
             data: { name, icon, userId },
         });
         revalidatePath("/");
@@ -53,7 +53,7 @@ export async function createShoppingList(name: string, icon: string = "🛒") {
 export async function getShoppingListById(listId: string) {
     try {
         const userId = await getUserId();
-        const list = await prisma.shoppingList.findFirst({
+        const list = await db.shoppingList.findFirst({
             where: { id: listId, userId },
             include: {
                 items: {
@@ -76,12 +76,12 @@ export async function addShoppingListItem(listId: string, name: string, emoji?: 
     try {
         const userId = await getUserId();
         // Verify ownership
-        const list = await prisma.shoppingList.findFirst({ where: { id: listId, userId } });
+        const list = await db.shoppingList.findFirst({ where: { id: listId, userId } });
         if (!list) throw new Error("List not found or unauthorized");
 
         const { quantity, unit } = normalizeProductData(name, 1, "יח'");
 
-        const item = await prisma.shoppingListItem.create({
+        const item = await db.shoppingListItem.create({
             data: {
                 shoppingListId: listId,
                 name,
@@ -109,12 +109,12 @@ export async function toggleListItemChecked(itemId: string, isChecked: boolean, 
         if (!userId) return { success: false };
 
         // Ownership check: verify the list belongs to this user
-        const list = await prisma.shoppingList.findFirst({
+        const list = await db.shoppingList.findFirst({
             where: { id: listId, userId }
         });
         if (!list) return { success: false };
 
-        await prisma.shoppingListItem.update({
+        await db.shoppingListItem.update({
             where: { id: itemId },
             data: { isChecked }
         });
@@ -128,7 +128,7 @@ export async function toggleListItemChecked(itemId: string, isChecked: boolean, 
 export async function clearCheckedItems(listId: string) {
     try {
         const userId = await getUserId();
-        await prisma.shoppingListItem.deleteMany({
+        await db.shoppingListItem.deleteMany({
             where: { shoppingListId: listId, isChecked: true }
         });
         revalidatePath(`/list/${listId}`);
@@ -143,14 +143,14 @@ export async function finishShoppingRoute(listId: string) {
         const userId = await getUserId();
 
         // Find all checked items
-        const checkedItems = await prisma.shoppingListItem.findMany({
+        const checkedItems = await db.shoppingListItem.findMany({
             where: { shoppingListId: listId, isChecked: true }
         });
 
         if (checkedItems.length === 0) return { success: true, count: 0 };
 
         // Move to Inventory
-        const inventoryData = checkedItems.map(item => {
+        const inventoryData = checkedItems.map((item: any) => {
             const { quantity, unit } = normalizeProductData(item.name, item.quantity, item.unit);
             return {
                 userId,
@@ -170,12 +170,12 @@ export async function finishShoppingRoute(listId: string) {
             };
         });
 
-        await prisma.inventoryItem.createMany({
+        await db.inventoryItem.createMany({
             data: inventoryData
         });
 
         // Delete from list
-        await prisma.shoppingListItem.deleteMany({
+        await db.shoppingListItem.deleteMany({
             where: { shoppingListId: listId, isChecked: true }
         });
 
@@ -191,7 +191,7 @@ export async function finishShoppingRoute(listId: string) {
 export async function updateItemQuantity(itemId: string, quantity: number, listId: string) {
     try {
         const userId = await getUserId();
-        await prisma.shoppingListItem.update({
+        await db.shoppingListItem.update({
             where: { id: itemId },
             data: { quantity }
         });
@@ -204,7 +204,7 @@ export async function updateItemQuantity(itemId: string, quantity: number, listI
 
 export async function updateShoppingListItemDetails(itemId: string, name: string, emoji?: string, listId?: string) {
     try {
-        await prisma.shoppingListItem.update({
+        await db.shoppingListItem.update({
             where: { id: itemId },
             data: { name, emoji }
         });
@@ -222,13 +222,13 @@ export async function deleteShoppingListItem(itemId: string, listId?: string) {
 
         // Ownership check: verify the list belongs to this user
         if (listId) {
-            const list = await prisma.shoppingList.findFirst({
+            const list = await db.shoppingList.findFirst({
                 where: { id: listId, userId }
             });
             if (!list) return { success: false };
         }
 
-        await prisma.shoppingListItem.delete({
+        await db.shoppingListItem.delete({
             where: { id: itemId }
         });
         if (listId) revalidatePath(`/list/${listId}`);
@@ -241,7 +241,7 @@ export async function deleteShoppingListItem(itemId: string, listId?: string) {
 export async function deleteShoppingList(listId: string) {
     try {
         const userId = await getUserId();
-        await prisma.shoppingList.delete({
+        await db.shoppingList.delete({
             where: {
                 id: listId,
                 userId: userId
@@ -263,7 +263,7 @@ export async function ensureDefaultLists(userId: string) {
 
     for (const config of defaultConfigs) {
         // Check both by name and type to avoid duplicates if renamed
-        const exists = await prisma.shoppingList.findFirst({
+        const exists = await db.shoppingList.findFirst({
             where: {
                 userId,
                 OR: [
@@ -274,7 +274,7 @@ export async function ensureDefaultLists(userId: string) {
         });
 
         if (!exists) {
-            await prisma.shoppingList.create({
+            await db.shoppingList.create({
                 data: {
                     userId,
                     name: config.name,
@@ -284,7 +284,7 @@ export async function ensureDefaultLists(userId: string) {
             });
         } else if (exists.type !== config.type || exists.icon !== config.icon) {
             // Update existing to ensure correct type/icon if it was legacy
-            await prisma.shoppingList.update({
+            await db.shoppingList.update({
                 where: { id: exists.id },
                 data: { type: config.type, icon: config.icon }
             });
@@ -295,13 +295,13 @@ export async function ensureDefaultLists(userId: string) {
 export async function addItemToDefaultList(item: { name: string; emoji?: string; category?: string; unit?: string; quantity?: number }) {
     try {
         const userId = await getUserId();
-        let list = await prisma.shoppingList.findFirst({
+        let list = await db.shoppingList.findFirst({
             where: { userId, name: "רשימת קניות" }
         });
 
         if (!list) {
             await ensureDefaultLists(userId);
-            list = await prisma.shoppingList.findFirst({
+            list = await db.shoppingList.findFirst({
                 where: { userId, name: "רשימת קניות" }
             });
         }
@@ -310,7 +310,7 @@ export async function addItemToDefaultList(item: { name: string; emoji?: string;
 
         const { quantity, unit } = normalizeProductData(item.name, 1, item.unit || getRecommendedUnit(item.name));
 
-        await prisma.shoppingListItem.create({
+        await db.shoppingListItem.create({
             data: {
                 shoppingListId: list.id,
                 name: item.name,

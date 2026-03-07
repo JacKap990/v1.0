@@ -1,15 +1,14 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/db";
 import { getUserId } from "@/lib/auth/serverAuth";
-import { askGemini } from "@/lib/gemini";
 
 export async function getAnalytics() {
     try {
         const userId = await getUserId();
 
         // 1. Get Inventory Data
-        const items = await prisma.inventoryItem.findMany({
+        const items = await db.inventoryItem.findMany({
             where: { userId },
             orderBy: { expiryDate: 'asc' }
         });
@@ -21,7 +20,7 @@ export async function getAnalytics() {
         // 2. Simple Statistics
         const totalItems = items.length;
         const lowStock = items.filter((i: any) => (i.quantity || 0) <= 0.2 * (i.minQuantity || 1)).length;
-        const expiringSoon = items.filter(i => {
+        const expiringSoon = items.filter((i: any) => {
             if (!i.expiryDate) return false;
             const daysLeft = Math.ceil((new Date(i.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
             return daysLeft >= 0 && daysLeft <= 3;
@@ -29,7 +28,7 @@ export async function getAnalytics() {
 
         // 3. Group by Base Product Name
         const groups: Record<string, any> = {};
-        items.forEach(i => {
+        items.forEach((i: any) => {
             const groupKey = (i as any).baseProductName || i.name;
             if (!groups[groupKey]) {
                 groups[groupKey] = {
@@ -67,7 +66,7 @@ export async function getAnalytics() {
 
         // 4. Category Breakdown
         const categories: Record<string, number> = {};
-        items.forEach(i => {
+        items.forEach((i: any) => {
             const cat = i.category || "אחר";
             categories[cat] = (categories[cat] || 0) + 1;
         });
@@ -92,38 +91,32 @@ export async function getAnalytics() {
 export async function generateSmartConsumptionRates() {
     try {
         const userId = await getUserId();
-        const items = await prisma.inventoryItem.findMany({
+        const items = await db.inventoryItem.findMany({
             where: { userId },
             select: { id: true, name: true, category: true, quantity: true, unit: true, baseProductName: true }
         });
 
         if (items.length === 0) return { success: true, updated: 0 };
 
-        // Group by base name for AI context
-        const prompt = `אתה מנתח צריכה למשק בית ממוצע בישראל.
-עבור כל אחד מהמוצרים הבאים בארון/מקרר, הערך כמה ימים (בממוצע) לוקח לסיים את המוצר לפי הכמות שיש כרגע.
-שים לב: חלק מהמוצרים הם גרסאות שונות של אותו מוצר בסיס (למשל חלב תנובה וחלב טרה).
-הערך את ימי הצריכה עבור מוצר הבסיס.
+        // Call the consolidated AI gateway
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || "";
+        const aiRes = await fetch(`${baseUrl}/api/ai/generate-rates`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ items })
+        });
 
-המוצרים:
-${JSON.stringify(items)}
+        if (!aiRes.ok) throw new Error("AI Gateway failed");
+        const aiData = await aiRes.json();
+        if (!aiData.success) throw new Error(aiData.error || "AI failed to generate rates");
 
-החזר JSON בלבד (ללא markdown וללא הערות) במבנה הבא:
-[
-  { "id": "מזהה המוצר", "estimatedDays": מספר_ימים (למשל 7) }
-]`;
-
-        const aiResponse = await askGemini(prompt);
-        const jsonMatch = aiResponse.match(/\[[\s\S]*\]/);
-        if (!jsonMatch) return { success: false, error: "AI failed to return valid JSON" };
-
-        const rates = JSON.parse(jsonMatch[0]);
+        const rates = aiData.rates;
 
         let updated = 0;
         for (const rate of rates) {
             if (rate.id && rate.estimatedDays > 0) {
                 // Update specific item
-                await prisma.inventoryItem.update({
+                await db.inventoryItem.update({
                     where: { id: rate.id, userId },
                     data: { consumptionRate: Math.round(rate.estimatedDays) }
                 });

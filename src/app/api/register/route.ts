@@ -1,6 +1,6 @@
 export const runtime = 'edge';
 import { NextResponse } from "next/server";
-import { prisma } from "../../../lib/prisma";
+import { db } from "../../../lib/db";
 
 export async function POST(req: Request) {
     try {
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
         }
 
         // Check if user exists
-        const existingUser = await prisma.user.findUnique({
+        const existingUser = await db.user.findUnique({
             where: { email },
         });
 
@@ -34,16 +34,16 @@ export async function POST(req: Request) {
 
         // MVP: Storing plain text password as in the original vanilla app logic.
         // In actual production, this MUST use bcrypt.hash(password, 10)
-        const newUser = await prisma.user.create({
+        const newUser = await db.user.create({
             data: {
                 name,
                 email,
                 password,
-            },
+            } as any,
         });
 
         // Strip password from response
-        const { password: _, ...userWithoutPassword } = newUser;
+        const { password: _, ...userWithoutPassword } = newUser as any;
 
         return NextResponse.json(
             { success: true, user: userWithoutPassword },

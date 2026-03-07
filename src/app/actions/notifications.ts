@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/db";
 import { getUserId } from "@/lib/auth/serverAuth";
 import { isRunningLow } from "@/lib/consumption";
 import { differenceInDays } from "date-fns";
@@ -28,18 +28,18 @@ export async function getSmartNotifications(): Promise<SmartNotification[]> {
         const now = new Date();
 
         // 1. Get Inventory for Expiry and Low Stock
-        const inventory = await prisma.inventoryItem.findMany({
+        const inventory = await db.inventoryItem.findMany({
             where: { userId }
         });
 
         // 2. Check for Expiring Items (within 3 days)
-        const expiringItems = inventory.filter(item => {
+        const expiringItems = inventory.filter((item: any) => {
             if (!item.expiryDate) return false;
             const days = differenceInDays(new Date(item.expiryDate), now);
             return days >= 0 && days <= 3;
         });
 
-        expiringItems.forEach(item => {
+        expiringItems.forEach((item: any) => {
             notifications.push({
                 id: `expiry-${item.id}`,
                 type: "expiry",
@@ -54,19 +54,19 @@ export async function getSmartNotifications(): Promise<SmartNotification[]> {
         });
 
         // 3. Check for Low Stock (running low and NOT in any shopping list)
-        const lowItems = inventory.filter(item =>
+        const lowItems = inventory.filter((item: any) =>
             isRunningLow(item.updatedAt, item.quantity, (item as any).consumptionRate || 7)
         );
 
-        const shoppingListItems = await prisma.shoppingListItem.findMany({
+        const shoppingListItems = await db.shoppingListItem.findMany({
             where: {
-                shoppingList: { userId }
+                shoppingList: { userId } as any
             },
             select: { name: true }
         });
-        const itemsInLists = new Set(shoppingListItems.map(i => i.name.toLowerCase()));
+        const itemsInLists = new Set(shoppingListItems.map((i: any) => i.name.toLowerCase()));
 
-        lowItems.forEach(item => {
+        lowItems.forEach((item: any) => {
             if (!itemsInLists.has(item.name.toLowerCase())) {
                 notifications.push({
                     id: `low-${item.id}`,

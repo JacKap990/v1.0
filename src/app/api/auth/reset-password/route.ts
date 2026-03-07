@@ -1,6 +1,6 @@
 export const runtime = 'edge';
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/db";
 
 export async function POST(req: Request) {
     try {
@@ -10,7 +10,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Email is required" }, { status: 400 });
         }
 
-        const user = await prisma.user.findUnique({
+        const user = await db.user.findUnique({
             where: { email },
         });
 
@@ -26,7 +26,7 @@ export async function POST(req: Request) {
         const expires = new Date(Date.now() + 1000 * 60 * 60); // 1 hour expiration
 
         // Save token to DB
-        await prisma.passwordResetToken.upsert({
+        await db.passwordResetToken.upsert({
             where: { email },
             update: { token, expires },
             create: { email, token, expires }

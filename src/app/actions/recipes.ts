@@ -1,6 +1,4 @@
-"use server";
-
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/db";
 import { auth } from "../../../auth";
 import { getUserId } from "@/lib/auth/serverAuth";
 
@@ -13,7 +11,7 @@ export async function getRecipes() {
             userId = null;
         }
 
-        const recipes = await prisma.recipe.findMany({
+        const recipes = await db.recipe.findMany({
             where: {
                 OR: [
                     { isPrivate: false },
@@ -32,7 +30,7 @@ export async function getRecipes() {
 
 export async function getRecipeById(id: string) {
     try {
-        const recipe = await prisma.recipe.findUnique({
+        const recipe = await db.recipe.findUnique({
             where: { id }
         });
         return recipe;
@@ -46,7 +44,7 @@ export async function getUserRecipes() {
     try {
         const userId = await getUserId();
 
-        const recipes = await prisma.recipe.findMany({
+        const recipes = await db.recipe.findMany({
             where: { userId: userId },
             orderBy: { updatedAt: "desc" }
         });
@@ -61,7 +59,7 @@ export async function getUserFavorites() {
     try {
         const userId = await getUserId();
 
-        const favorites = await prisma.userFavoriteRecipe.findMany({
+        const favorites = await db.userFavoriteRecipe.findMany({
             where: { userId: userId },
             include: { recipe: true },
             orderBy: { addedAt: "desc" }
@@ -77,7 +75,7 @@ export async function toggleFavorite(recipeId: string) {
     try {
         const userId = await getUserId();
 
-        const existing = await prisma.userFavoriteRecipe.findUnique({
+        const existing = await db.userFavoriteRecipe.findUnique({
             where: {
                 userId_recipeId: {
                     userId: userId,
@@ -87,12 +85,12 @@ export async function toggleFavorite(recipeId: string) {
         });
 
         if (existing) {
-            await prisma.userFavoriteRecipe.delete({
-                where: { id: existing.id }
+            await db.userFavoriteRecipe.delete({
+                where: { id: (existing as any).id }
             });
             return { success: true, favorited: false };
         } else {
-            await prisma.userFavoriteRecipe.create({
+            await db.userFavoriteRecipe.create({
                 data: {
                     userId: userId,
                     recipeId
@@ -110,7 +108,7 @@ export async function isFavorited(recipeId: string) {
     try {
         const userId = await getUserId();
 
-        const existing = await prisma.userFavoriteRecipe.findUnique({
+        const existing = await db.userFavoriteRecipe.findUnique({
             where: {
                 userId_recipeId: {
                     userId: userId,
@@ -128,26 +126,26 @@ export async function forkRecipe(recipeId: string) {
     try {
         const userId = await getUserId();
 
-        const original = await prisma.recipe.findUnique({
+        const original = await db.recipe.findUnique({
             where: { id: recipeId }
         });
 
         if (!original) return { success: false };
 
-        const forked = await prisma.recipe.create({
+        const forked = await db.recipe.create({
             data: {
                 userId: userId,
                 isPrivate: true,
-                originalId: original.id,
-                name: `${original.name} (גרסה שלי)`,
-                emoji: original.emoji,
-                image: original.image,
-                time: original.time,
-                difficulty: original.difficulty,
-                servings: original.servings,
-                tags: original.tags,
-                ingredients: original.ingredients,
-                instructions: original.instructions,
+                originalId: (original as any).id,
+                name: `${(original as any).name} (גרסה שלי)`,
+                emoji: (original as any).emoji,
+                image: (original as any).image,
+                time: (original as any).time,
+                difficulty: (original as any).difficulty,
+                servings: (original as any).servings,
+                tags: (original as any).tags,
+                ingredients: (original as any).ingredients,
+                instructions: (original as any).instructions,
             }
         });
 
@@ -171,7 +169,7 @@ export async function createCustomRecipe(data: {
     try {
         const userId = await getUserId();
 
-        const recipe = await prisma.recipe.create({
+        const recipe = await db.recipe.create({
             data: {
                 userId: userId,
                 isPrivate: true,
@@ -209,12 +207,12 @@ export async function updateRecipe(id: string, data: {
         const userId = await getUserId();
 
         // Ensure user owns the recipe
-        const existing = await prisma.recipe.findUnique({ where: { id } });
-        if (!existing || existing.userId !== userId) {
+        const existing = await db.recipe.findUnique({ where: { id } });
+        if (!existing || (existing as any).userId !== userId) {
             return { success: false, error: "Unauthorized" };
         }
 
-        const updated = await prisma.recipe.update({
+        const updated = await db.recipe.update({
             where: { id },
             data: {
                 name: data.name,
@@ -241,12 +239,12 @@ export async function deleteRecipe(id: string) {
         const userId = await getUserId();
 
         // Ensure user owns the recipe
-        const existing = await prisma.recipe.findUnique({ where: { id } });
-        if (!existing || existing.userId !== userId) {
+        const existing = await db.recipe.findUnique({ where: { id } });
+        if (!existing || (existing as any).userId !== userId) {
             return { success: false, error: "Unauthorized" };
         }
 
-        await prisma.recipe.delete({ where: { id } });
+        await db.recipe.delete({ where: { id } });
         return { success: true };
     } catch (error) {
         console.error("Failed to delete recipe:", error);
@@ -323,7 +321,7 @@ export async function seedSystemRecipes() {
         ];
 
         for (const r of systemRecipes) {
-            await prisma.recipe.upsert({
+            await db.recipe.upsert({
                 where: { id: r.id },
                 update: {
                     name: r.name,

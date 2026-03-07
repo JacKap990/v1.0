@@ -1,10 +1,8 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
-import { PrismaAdapter } from "@auth/prisma-adapter"
-import { prisma } from "./src/lib/prisma"
+import { db } from "./src/lib/db"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-    adapter: PrismaAdapter(prisma),
     session: { strategy: "jwt" },
     providers: [
         Credentials({
@@ -20,7 +18,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
                 // Guest Logic
                 if (credentials.email === "guest@pantry.com" && credentials.password === "guest123") {
-                    const guestUser = await prisma.user.upsert({
+                    const guestUser = await db.user.upsert({
                         where: { email: "guest@pantry.com" },
                         update: {},
                         create: {
@@ -29,26 +27,26 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                             name: "Guest User",
                             themePref: "system",
                             colorTheme: "indigo",
-                        } as any
+                        }
                     });
-                    return guestUser;
+                    return guestUser as any;
                 }
 
-                const user = await prisma.user.findUnique({
+                const user = await db.user.findUnique({
                     where: { email: credentials.email as string }
                 });
 
-                if (!user || !user.password) {
+                if (!user || !(user as any).password) {
                     throw new Error("Invalid credentials");
                 }
 
-                const isPasswordValid = credentials.password === user.password;
+                const isPasswordValid = credentials.password === (user as any).password;
 
                 if (!isPasswordValid) {
                     throw new Error("Invalid credentials");
                 }
 
-                return user;
+                return user as any;
             }
         })
     ],
@@ -58,7 +56,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     callbacks: {
         async jwt({ token, user }) {
             if (user) {
-                token.id = user.id;
+                token.id = (user as any).id;
             }
             return token;
         },
@@ -69,5 +67,5 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             return session;
         }
     },
-    secret: process.env.NEXTAUTH_SECRET || "fallback_secret_for_development_only",
+    secret: process.env.NEXT_AUTH_SECRET || process.env.AUTH_SECRET || "fallback_secret",
 })

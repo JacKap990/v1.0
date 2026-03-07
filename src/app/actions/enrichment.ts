@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { getUserId } from "@/lib/auth/serverAuth";
 
@@ -10,7 +10,7 @@ export async function enrichMissingMetadata() {
         if (!userId) return { success: false, error: "Unauthorized" };
 
         // 1. Find items missing key technical data
-        const itemsToEnrich = await prisma.inventoryItem.findMany({
+        const itemsToEnrich = await db.inventoryItem.findMany({
             where: {
                 userId,
                 OR: [
@@ -32,7 +32,7 @@ export async function enrichMissingMetadata() {
 
         for (const item of itemsToEnrich) {
             try {
-                // Call the internal classify API
+                // Call the internal classify API (hits consolidated AI gateway)
                 const res = await fetch(`${baseUrl}/api/ai/classify`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -45,7 +45,7 @@ export async function enrichMissingMetadata() {
                 if (!data.success) continue;
 
                 // Update the item
-                await prisma.inventoryItem.update({
+                await db.inventoryItem.update({
                     where: { id: item.id },
                     data: {
                         manufacturer: (item as any).manufacturer || data.manufacturer,

@@ -1,14 +1,13 @@
 "use server";
-// Force TS re-evaluate after prisma generate
 
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { getUserId } from "@/lib/auth/serverAuth";
 
 export async function getUserSettings() {
     try {
         const userId = await getUserId();
-        const user = await prisma.user.findUnique({
+        const user = await db.user.findUnique({
             where: { id: userId },
             select: {
                 name: true,
@@ -38,7 +37,7 @@ export async function updateUserSettings(data: {
 }) {
     try {
         const userId = await getUserId();
-        await prisma.user.update({
+        await db.user.update({
             where: { id: userId },
             data
         });

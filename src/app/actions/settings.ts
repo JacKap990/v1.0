@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "../../../auth";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 
@@ -11,7 +11,7 @@ export async function getUserSettings() {
     if (!userId) return null;
 
     try {
-        const user = await prisma.user.findUnique({
+        const user = await db.user.findUnique({
             where: { id: userId },
             select: {
                 themePref: true,
@@ -54,7 +54,7 @@ export async function updateUserSettings(data: {
     if (!userId) return { success: false, error: "Not authenticated" };
 
     try {
-        await prisma.user.update({
+        await db.user.update({
             where: { id: userId },
             data
         });

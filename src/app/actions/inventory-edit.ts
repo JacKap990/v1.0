@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { getUserId } from "@/lib/auth/serverAuth";
 
@@ -23,7 +23,7 @@ export async function updateInventoryItemFull(
     try {
         const userId = await getUserId();
 
-        await prisma.inventoryItem.update({
+        await db.inventoryItem.update({
             where: { id, userId },
             data: {
                 name: data.name,
@@ -52,7 +52,7 @@ export async function deleteMultipleInventoryItems(ids: string[]) {
     try {
         const userId = await getUserId();
 
-        await prisma.inventoryItem.deleteMany({
+        await db.inventoryItem.deleteMany({
             where: {
                 id: { in: ids },
                 userId: userId

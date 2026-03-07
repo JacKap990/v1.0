@@ -1,6 +1,6 @@
 export const runtime = 'edge';
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/db';
 import { rateLimit } from '@/lib/rateLimit';
 import { smartSearchScore } from '@/lib/searchUtils';
 
@@ -26,7 +26,7 @@ export async function GET(request: Request) {
     try {
         if (barcode) {
             // Priority 1: Exact Barcode Match
-            const product = await prisma.globalProduct.findUnique({
+            const product = await db.globalProduct.findUnique({
                 where: { id: barcode }
             });
 
@@ -44,7 +44,7 @@ export async function GET(request: Request) {
 
             if (isNumericQuery) {
                 // Partial Barcode Search: search by ID (barcode) containing the digits
-                rawProducts = await prisma.globalProduct.findMany({
+                rawProducts = await db.globalProduct.findMany({
                     where: {
                         id: {
                             contains: trimmed
@@ -56,7 +56,7 @@ export async function GET(request: Request) {
 
             if (rawProducts.length === 0) {
                 // Primary search: name contains the full query
-                rawProducts = await prisma.globalProduct.findMany({
+                rawProducts = await db.globalProduct.findMany({
                     where: {
                         name: {
                             contains: trimmed
@@ -72,7 +72,7 @@ export async function GET(request: Request) {
                 const words = trimmed.split(/\s+/).filter(w => w.length >= 2);
                 if (words.length > 0) {
                     // Search for products matching ALL words (AND logic)
-                    rawProducts = await prisma.globalProduct.findMany({
+                    rawProducts = await db.globalProduct.findMany({
                         where: {
                             AND: words.map(word => ({
                                 name: { contains: word }
@@ -85,7 +85,7 @@ export async function GET(request: Request) {
 
             // Additional fallback: search by manufacturer field if exists
             if (rawProducts.length === 0) {
-                rawProducts = await prisma.globalProduct.findMany({
+                rawProducts = await db.globalProduct.findMany({
                     where: {
                         OR: [
                             { name: { contains: trimmed } },
@@ -141,7 +141,7 @@ export async function POST(request: Request) {
         const id = barcode?.trim() || `custom_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
         // Upsert: if barcode exists, update it; otherwise create new
-        const product = await prisma.globalProduct.upsert({
+        const product = await db.globalProduct.upsert({
             where: { id },
             update: {
                 name: name.trim(),

@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { calculateSmartExpiry } from "@/lib/smartEngine";
 import { getUserId } from "@/lib/auth/serverAuth";
@@ -31,7 +31,7 @@ function extractBaseName(name: string): string {
 export async function getInventory() {
     try {
         const userId = await getUserId();
-        const items = await prisma.inventoryItem.findMany({
+        const items = await db.inventoryItem.findMany({
             where: { userId },
             orderBy: { expiryDate: "asc" },
         });
@@ -62,14 +62,14 @@ export async function addInventoryItem(data: {
     const { quantity, unit } = normalizeProductData(data.name, data.quantity, data.unit);
 
     try {
-        const { remoteImage, ...prismaData } = data;
+        const { remoteImage, ...itemData } = data;
         const userId = await getUserId();
 
         console.log("Adding inventory item for user:", userId, data.name);
 
-        const item = await prisma.inventoryItem.create({
+        const item = await db.inventoryItem.create({
             data: {
-                ...prismaData,
+                ...itemData,
                 quantity: quantity || 1,
                 unit: unit || "יח'",
                 userId,
@@ -103,7 +103,7 @@ export async function updateInventoryQuantity(id: string, quantity: number) {
         const userId = await getUserId();
 
         // Fetch current item to get baseProductName
-        const item = await prisma.inventoryItem.findUnique({
+        const item = await db.inventoryItem.findUnique({
             where: { id, userId }
         });
 
@@ -112,7 +112,7 @@ export async function updateInventoryQuantity(id: string, quantity: number) {
         if (quantity <= 0) {
             // If item is finished, we could calculate a consumption rate here
             // For now, let's just delete or set to 0
-            await prisma.inventoryItem.delete({
+            await db.inventoryItem.delete({
                 where: { id, userId },
             });
 
@@ -121,7 +121,7 @@ export async function updateInventoryQuantity(id: string, quantity: number) {
             // to store the consumption rate for this BASE product.
             // Since we don't have that table yet, we'll just ensure baseProductName is consistent.
         } else {
-            await prisma.inventoryItem.update({
+            await db.inventoryItem.update({
                 where: { id, userId },
                 data: { quantity },
             });
@@ -138,7 +138,7 @@ export async function updateInventoryQuantity(id: string, quantity: number) {
 export async function deleteInventoryItem(id: string) {
     try {
         const userId = await getUserId();
-        await prisma.inventoryItem.delete({
+        await db.inventoryItem.delete({
             where: { id, userId },
         });
         revalidatePath("/inventory");
@@ -152,7 +152,7 @@ export async function deleteInventoryItem(id: string) {
 export async function updateInventoryItemDetails(id: string, name: string, emoji?: string) {
     try {
         const userId = await getUserId();
-        await prisma.inventoryItem.update({
+        await db.inventoryItem.update({
             where: { id, userId },
             data: { name, emoji }
         });
@@ -202,7 +202,7 @@ export async function addMultipleItemsToInventory(items: {
             };
         });
 
-        const createdCount = await prisma.inventoryItem.createMany({
+        const createdCount = await db.inventoryItem.createMany({
             data: data
         });
 
