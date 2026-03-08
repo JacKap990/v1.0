@@ -1,5 +1,5 @@
 "use client";
-export const runtime = 'edge';
+
 
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
@@ -193,7 +193,7 @@ export default function Dashboard() {
                             >
                                 <div className="flex items-center gap-4">
                                     <div className={`w-10 h-10 rounded-2xl shadow-sm flex items-center justify-center ${note.severity === 'high' ? 'bg-white text-rose-500' :
-                                            note.severity === 'medium' ? 'bg-white text-amber-500' : 'bg-white text-indigo-500'
+                                        note.severity === 'medium' ? 'bg-white text-amber-500' : 'bg-white text-indigo-500'
                                         }`}>
                                         {note.type === 'expiry' ? <Clock className="w-5 h-5" /> :
                                             note.type === 'low_stock' ? <TrendingDown className="w-5 h-5" /> : <ChefHat className="w-5 h-5" />}
@@ -205,7 +205,7 @@ export default function Dashboard() {
                                 </div>
                                 <div className="flex justify-end mt-2 pr-1">
                                     <Link href={note.actionUrl || "#"} className={`text-[10px] font-black px-4 py-2 rounded-full shadow-sm transition-all hover:scale-105 active:scale-95 ${note.severity === 'high' ? 'bg-rose-500 text-white' :
-                                            note.severity === 'medium' ? 'bg-amber-500 text-white' : 'bg-indigo-600 text-white'
+                                        note.severity === 'medium' ? 'bg-amber-500 text-white' : 'bg-indigo-600 text-white'
                                         }`}>
                                         {note.actionLabel || t("handle")}
                                     </Link>

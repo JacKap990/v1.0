@@ -1,5 +1,5 @@
 "use client";
-export const runtime = 'edge';
+
 
 import { useEffect, useState } from "react";
 import { getAnalytics, generateSmartConsumptionRates } from "@/app/actions/analytics";

@@ -1,5 +1,5 @@
 "use client";
-export const runtime = 'edge';
+
 
 import { useEffect } from "react";
 import { AlertOctagon, RotateCcw, Home } from "lucide-react";
