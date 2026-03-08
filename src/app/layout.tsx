@@ -25,19 +25,19 @@ export const metadata: Metadata = {
   description: "ניהול מצרכים מתקדם ומבוסס בינה מלאכותית",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieStore = await cookies();
-  const lang = cookieStore.get("pantry-lang")?.value || "he";
-  const theme = cookieStore.get("pantry-theme")?.value || "system";
-  const color = cookieStore.get("pantry-color")?.value || "indigo";
-  const density = cookieStore.get("pantry-density")?.value || "comfortable";
-  const profileImage = cookieStore.get("pantry-profile")?.value || null;
+  // Static defaults for SSR. Hydration happens in ThemeProvider/LanguageProvider on client.
+  const lang = "he";
+  const theme = "system";
+  const color = "indigo";
+  const density = "comfortable";
+  const profileImage = null;
 
-  const dir = lang === "en" ? "ltr" : "rtl";
+  const dir = "rtl";
 
   return (
     <html lang={lang} dir={dir} suppressHydrationWarning>
