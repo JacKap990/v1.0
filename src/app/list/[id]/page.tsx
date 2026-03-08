@@ -1,5 +1,4 @@
 "use client";
-export const runtime = 'edge';
 
 
 import { useEffect, useState } from "react";
@@ -35,7 +34,6 @@ import {
 import { getInventory } from "@/app/actions/inventory";
 import { isRunningLow } from "@/lib/consumption";
 import { ProductSearchModal } from "@/components/ProductSearchModal";
-import { EditProductModal } from "@/components/EditProductModal";
 import { ProductDetailModal } from "@/components/ProductDetailModal";
 import { updateShoppingListItemFull, deleteMultipleShoppingListItems } from "@/app/actions/lists-edit";
 import { useToast } from "@/components/ui/Toast";

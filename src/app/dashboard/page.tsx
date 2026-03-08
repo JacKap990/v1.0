@@ -1,5 +1,4 @@
 "use client";
-export const runtime = 'edge';
 
 
 import { useSession } from "next-auth/react";
@@ -48,11 +47,11 @@ export default function Dashboard() {
                 getSmartNotifications()
             ]);
 
-            const runningLow = inv.filter(i => isRunningLow(i.updatedAt, i.quantity, (i as any).consumptionRate));
+            const runningLow = inv.filter((i: any) => isRunningLow(i.updatedAt, i.quantity, (i as any).consumptionRate));
 
             setStats({
                 inventoryCount: inv.length,
-                expiringCount: inv.filter(i => {
+                expiringCount: inv.filter((i: any) => {
                     if (!i.expiryDate) return false;
                     const days = Math.ceil((new Date(i.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
                     return days >= 0 && days <= 3;

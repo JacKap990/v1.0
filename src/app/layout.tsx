@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { Heebo, Inter } from "next/font/google";
 import "./globals.css";
 import { NextAuthProvider } from "@/components/NextAuthProvider";
-import { BottomNav } from "@/components/BottomNav";
-import { Header } from "@/components/Header";
 import { ToastProvider } from "@/components/ui/Toast";
 import { MainLayoutWrapper } from "@/components/MainLayoutWrapper";
 import { ErrorBoundary } from "@/components/ErrorBoundary";

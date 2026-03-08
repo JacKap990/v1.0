@@ -1,5 +1,4 @@
 "use client";
-export const runtime = 'edge';
 
 
 import { useTheme } from "@/components/ThemeProvider";
