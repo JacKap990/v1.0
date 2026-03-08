@@ -33,7 +33,7 @@ export async function enrichMissingMetadata() {
         for (const item of itemsToEnrich) {
             try {
                 // Call the internal classify API (hits consolidated AI gateway)
-                const res = await fetch(`${baseUrl}/api/ai/classify`, {
+                const res = await fetch(`${baseUrl}/api/gateway/ai/classify`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ name: item.name })

@@ -100,14 +100,13 @@ export async function generateSmartConsumptionRates() {
 
         // Call the consolidated AI gateway
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || "";
-        const aiRes = await fetch(`${baseUrl}/api/ai/generate-rates`, {
+        const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/gateway/ai/generate-rates`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ items })
         });
 
-        if (!aiRes.ok) throw new Error("AI Gateway failed");
-        const aiData = await aiRes.json();
+        const aiData = await response.json();
         if (!aiData.success) throw new Error(aiData.error || "AI failed to generate rates");
 
         const rates = aiData.rates;

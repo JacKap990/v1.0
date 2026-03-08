@@ -41,7 +41,7 @@ export function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
         setLoading(true);
 
         try {
-            const response = await fetch("/api/ai/chat", {
+            const response = await fetch("/api/gateway/ai/chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ messages: [...messages, userMsg] }),

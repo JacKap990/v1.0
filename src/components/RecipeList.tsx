@@ -67,7 +67,7 @@ export function RecipeList({ initialRecipes, inventory, currentUser, favoriteIds
     const handleAiRecommend = async () => {
         setAiLoading(true);
         try {
-            const res = await fetch("/api/ai/recommend", { method: "POST" });
+            const res = await fetch("/api/gateway/ai/recommend", { method: "POST" });
             const data = await res.json();
             if (data.success) {
                 setAiRecommendations(data.recipes);
@@ -86,7 +86,7 @@ export function RecipeList({ initialRecipes, inventory, currentUser, favoriteIds
         setImportLoading(true);
         setImportError("");
         try {
-            const res = await fetch("/api/ai/import-recipe", {
+            const res = await fetch("/api/gateway/ai/import-recipe", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ url: importUrl }),

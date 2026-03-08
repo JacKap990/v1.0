@@ -89,7 +89,7 @@ export default function ScanPage() {
 
         // Fetch product from 13MB Israeli products Database Backend
         try {
-            const res = await fetch(`/api/lookup?barcode=${barcode}`);
+            const res = await fetch(`/api/gateway/lookup?barcode=${barcode}`);
             if (!res.ok) {
                 // Product not in DB
                 setIsLoading(false);

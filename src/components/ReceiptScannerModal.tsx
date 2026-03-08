@@ -59,7 +59,7 @@ export function ReceiptScannerModal({ isOpen, onClose }: ReceiptScannerModalProp
         setStep("analyzing");
 
         try {
-            const res = await fetch('/api/ocr', { method: 'POST' });
+            const res = await fetch('/api/gateway/ocr', { method: 'POST' });
 
             if (res.ok) {
                 const data = await res.json();

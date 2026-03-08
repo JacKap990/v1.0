@@ -22,8 +22,7 @@ export default function RegisterPage() {
         setLoading(true);
 
         try {
-            // 1. Create User via custom API Route
-            const res = await fetch("/api/register", {
+            const res = await fetch("/api/gateway/register", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ name, email, password }),
@@ -34,7 +33,6 @@ export default function RegisterPage() {
                 throw new Error(data.error || "שגיאה ביצירת החשבון");
             }
 
-            // 2. Log them in immediately
             const loginRes = await signIn("credentials", {
                 redirect: false,
                 email,

@@ -3,7 +3,7 @@ export const runtime = 'edge';
 
 
 import { useEffect, useState } from "react";
-import { getAnalytics } from "@/app/actions/analytics";
+import { getAnalytics, generateSmartConsumptionRates } from "@/app/actions/analytics";
 import { getCategoryLabel } from "@/lib/localization";
 import {
     BarChart3,
@@ -143,7 +143,7 @@ export default function AnalyticsPage() {
                     <button
                         onClick={async () => {
                             setLoading(true);
-                            const res = await fetch('/api/ai/analyze-consumption', { method: 'POST' });
+                            await generateSmartConsumptionRates();
                             window.location.reload();
                         }}
                         className="text-[10px] font-black uppercase tracking-widest bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-full hover:bg-indigo-100 transition-colors flex items-center gap-1"

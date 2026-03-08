@@ -51,7 +51,7 @@ export function ProductSearchModal({ isOpen, onClose, onSelect, title }: Product
         const fetchResults = async () => {
             setIsLoading(true);
             try {
-                const res = await fetch(`/api/lookup?q=${encodeURIComponent(query)}`);
+                const res = await fetch(`/api/gateway/lookup?q=${encodeURIComponent(query)}`);
                 if (res.ok) {
                     const data = await res.json();
                     if (data.success && Array.isArray(data.products)) {
@@ -82,7 +82,7 @@ export function ProductSearchModal({ isOpen, onClose, onSelect, title }: Product
 
         // AI classify in the background (fire and forget — improves future lookups)
         try {
-            const classifyRes = await fetch('/api/ai/classify', {
+            const classifyRes = await fetch('/api/gateway/ai/classify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: productName })
@@ -90,7 +90,7 @@ export function ProductSearchModal({ isOpen, onClose, onSelect, title }: Product
             const classifyData = await classifyRes.json();
             if (classifyData.success && classifyData.category) {
                 // Save to global DB with AI-classified data
-                fetch('/api/lookup', {
+                fetch('/api/gateway/lookup', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -102,7 +102,7 @@ export function ProductSearchModal({ isOpen, onClose, onSelect, title }: Product
             }
         } catch (e) {
             // Fire and forget — save with defaults
-            fetch('/api/lookup', {
+            fetch('/api/gateway/lookup', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(defaultData)

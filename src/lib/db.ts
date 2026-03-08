@@ -11,7 +11,7 @@ const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
 
 async function dbRequest(model: string, action: string, args: any) {
     try {
-        const response = await fetch(`${baseUrl}/api/internal/db`, {
+        const response = await fetch(`${baseUrl}/api/gateway/db`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

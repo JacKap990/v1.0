@@ -109,7 +109,7 @@ export default function LoginPage() {
         setResetLoading(true);
 
         try {
-            const res = await fetch("/api/auth/reset-password", {
+            const res = await fetch("/api/gateway/reset-password", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email: resetEmail }),

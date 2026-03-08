@@ -24,28 +24,12 @@ export default function ReceiptScanPage() {
     const [saved, setSaved] = useState(false);
     const fileRef = useRef<HTMLInputElement>(null);
 
-    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-            const dataUrl = ev.target?.result as string;
-            setImage(dataUrl);
-            setProducts([]);
-            setError("");
-            setSaved(false);
-            analyzeReceipt(dataUrl);
-        };
-        reader.readAsDataURL(file);
-    };
-
     const analyzeReceipt = async (dataUrl: string) => {
         setLoading(true);
         setError("");
 
         try {
-            const res = await fetch("/api/ai/scan-receipt", {
+            const res = await fetch("/api/gateway/ai/scan-receipt", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ image: dataUrl }),
@@ -66,6 +50,22 @@ export default function ReceiptScanPage() {
         }
     };
 
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const dataUrl = ev.target?.result as string;
+            setImage(dataUrl);
+            setProducts([]);
+            setError("");
+            setSaved(false);
+            analyzeReceipt(dataUrl);
+        };
+        reader.readAsDataURL(file);
+    };
+
     const toggleProduct = (index: number) => {
         setProducts(prev =>
             prev.map((p, i) => i === index ? { ...p, selected: !p.selected } : p)
@@ -78,9 +78,8 @@ export default function ReceiptScanPage() {
 
         setLoading(true);
         try {
-            // Add each product to inventory via the existing inventory action
             for (const product of selected) {
-                await fetch("/api/lookup", {
+                await fetch("/api/gateway/lookup", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -100,6 +99,7 @@ export default function ReceiptScanPage() {
 
     return (
         <div className="p-4 pb-24 min-h-screen">
+            {/* ... keep original rest of return ... */}
             {/* Header */}
             <header className="mb-6">
                 <div className="flex items-center gap-3 mb-2">
