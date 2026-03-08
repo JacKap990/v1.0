@@ -3,11 +3,25 @@
 import { useState, useMemo } from "react";
 import { Search, Clock, ChefHat, Sparkles, Heart, ChefHat as ChefHatIcon, Flame, Plus, Brain, Link2, Loader2, X } from "lucide-react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
 import { isIngredientMatch } from "@/lib/smartEngine";
 import { FAB } from "./ui/FAB";
 import { NewRecipeModal } from "./NewRecipeModal";
 import { useRouter } from "next/navigation";
+
+interface Recipe {
+    id: string;
+    name: string;
+    emoji: string | null;
+    image: string | null;
+    time: string | null;
+    difficulty: string | null;
+    tags: string | null;
+    ingredients: string | null;
+    userId: string | null;
+    missingCount?: number;
+}
+// ... (rest of the component logic stays the same, just removing framer-motion UI elements)
+// I will provide the full replacement for clarity to avoid more chunk errors.
 
 interface Recipe {
     id: string;
@@ -431,106 +445,98 @@ export function RecipeList({ initialRecipes, inventory, currentUser, favoriteIds
             />
 
             {/* Import from URL Modal */}
-            <AnimatePresence>
-                {showImportModal && (
-                    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={() => setShowImportModal(false)}
-                            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
-                        />
-                        <motion.div
-                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
-                            animate={{ scale: 1, opacity: 1, y: 0 }}
-                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                            className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden p-6"
-                        >
-                            <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-xl font-black text-slate-800 flex items-center gap-2">
-                                    <Link2 className="w-6 h-6 text-indigo-500" /> ייבוא מתכון
-                                </h3>
-                                <button onClick={() => setShowImportModal(false)}>
-                                    <X className="w-6 h-6 text-slate-400" />
+            {showImportModal && (
+                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 overflow-hidden">
+                    <div
+                        onClick={() => setShowImportModal(false)}
+                        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300"
+                    />
+                    <div
+                        className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden p-6 animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-300"
+                    >
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-xl font-black text-slate-800 flex items-center gap-2">
+                                <Link2 className="w-6 h-6 text-indigo-500" /> ייבוא מתכון
+                            </h3>
+                            <button onClick={() => setShowImportModal(false)}>
+                                <X className="w-6 h-6 text-slate-400" />
+                            </button>
+                        </div>
+
+                        {!importedRecipe ? (
+                            <div className="space-y-4">
+                                <p className="text-sm text-slate-500">הדבק כתובת URL של מתכון מכל אתר (Mako, Xnet, וכו') וה-AI שלנו יחלץ אותו עבורך!</p>
+                                <div className="relative">
+                                    <input
+                                        type="url"
+                                        value={importUrl}
+                                        onChange={(e) => setImportUrl(e.target.value)}
+                                        placeholder="https://..."
+                                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-4 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                                    />
+                                </div>
+                                {importError && <p className="text-xs text-rose-500 font-bold">{importError}</p>}
+                                <button
+                                    onClick={handleImportRecipe}
+                                    disabled={importLoading || !importUrl}
+                                    className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                                >
+                                    {importLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
+                                    {importLoading ? "מנתח מתכון..." : "ייבא עכשיו"}
                                 </button>
                             </div>
-
-                            {!importedRecipe ? (
-                                <div className="space-y-4">
-                                    <p className="text-sm text-slate-500">הדבק כתובת URL של מתכון מכל אתר (Mako, Xnet, וכו') וה-AI שלנו יחלץ אותו עבורך!</p>
-                                    <div className="relative">
-                                        <input
-                                            type="url"
-                                            value={importUrl}
-                                            onChange={(e) => setImportUrl(e.target.value)}
-                                            placeholder="https://..."
-                                            className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-4 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
-                                        />
+                        ) : (
+                            <div className="space-y-6">
+                                <div className="flex items-center gap-4 bg-emerald-50 p-4 rounded-2xl border border-emerald-100">
+                                    <div className="text-3xl">✅</div>
+                                    <div>
+                                        <p className="font-black text-emerald-800 text-sm">המתכון זוהה בהצלחה!</p>
+                                        <p className="text-emerald-600 text-xs">{importedRecipe.title}</p>
                                     </div>
-                                    {importError && <p className="text-xs text-rose-500 font-bold">{importError}</p>}
+                                </div>
+
+                                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 max-h-48 overflow-y-auto text-xs space-y-2 no-scrollbar">
+                                    <p className="font-bold text-slate-700">מה חילצנו:</p>
+                                    <p><span className="text-slate-400">זמן:</span> {importedRecipe.prepTime}</p>
+                                    <p><span className="text-slate-400">מנות:</span> {importedRecipe.servings}</p>
+                                    <p><span className="text-slate-400">מצרכים:</span> {importedRecipe.ingredients?.length} פריטים</p>
+                                </div>
+
+                                <div className="flex gap-3">
                                     <button
-                                        onClick={handleImportRecipe}
-                                        disabled={importLoading || !importUrl}
-                                        className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                                        onClick={() => setImportedRecipe(null)}
+                                        className="flex-1 py-3 border border-slate-200 rounded-2xl text-sm font-bold text-slate-500"
                                     >
-                                        {importLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
-                                        {importLoading ? "מנתח מתכון..." : "ייבא עכשיו"}
+                                        ביטול
+                                    </button>
+                                    <button
+                                        onClick={async () => {
+                                            const { createCustomRecipe } = await import("@/app/actions/recipes");
+                                            const res = await createCustomRecipe({
+                                                name: importedRecipe.title,
+                                                description: importedRecipe.description,
+                                                time: importedRecipe.prepTime,
+                                                servings: importedRecipe.servings,
+                                                ingredients: importedRecipe.ingredients,
+                                                instructions: importedRecipe.instructions,
+                                                tags: importedRecipe.tags
+                                            });
+                                            if (res.success) {
+                                                setShowImportModal(false);
+                                                setImportedRecipe(null);
+                                                router.refresh();
+                                            }
+                                        }}
+                                        className="flex-[2] py-3 bg-indigo-600 text-white rounded-2xl font-black shadow-lg"
+                                    >
+                                        שמור במזווה שלי
                                     </button>
                                 </div>
-                            ) : (
-                                <div className="space-y-6">
-                                    <div className="flex items-center gap-4 bg-emerald-50 p-4 rounded-2xl border border-emerald-100">
-                                        <div className="text-3xl">✅</div>
-                                        <div>
-                                            <p className="font-black text-emerald-800 text-sm">המתכון זוהה בהצלחה!</p>
-                                            <p className="text-emerald-600 text-xs">{importedRecipe.title}</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 max-h-48 overflow-y-auto text-xs space-y-2 no-scrollbar">
-                                        <p className="font-bold text-slate-700">מה חילצנו:</p>
-                                        <p><span className="text-slate-400">זמן:</span> {importedRecipe.prepTime}</p>
-                                        <p><span className="text-slate-400">מנות:</span> {importedRecipe.servings}</p>
-                                        <p><span className="text-slate-400">מצרכים:</span> {importedRecipe.ingredients?.length} פריטים</p>
-                                    </div>
-
-                                    <div className="flex gap-3">
-                                        <button
-                                            onClick={() => setImportedRecipe(null)}
-                                            className="flex-1 py-3 border border-slate-200 rounded-2xl text-sm font-bold text-slate-500"
-                                        >
-                                            ביטול
-                                        </button>
-                                        <button
-                                            onClick={async () => {
-                                                const { createCustomRecipe } = await import("@/app/actions/recipes");
-                                                const res = await createCustomRecipe({
-                                                    name: importedRecipe.title,
-                                                    description: importedRecipe.description,
-                                                    time: importedRecipe.prepTime,
-                                                    servings: importedRecipe.servings,
-                                                    ingredients: importedRecipe.ingredients,
-                                                    instructions: importedRecipe.instructions,
-                                                    tags: importedRecipe.tags
-                                                });
-                                                if (res.success) {
-                                                    setShowImportModal(false);
-                                                    setImportedRecipe(null);
-                                                    router.refresh();
-                                                }
-                                            }}
-                                            className="flex-[2] py-3 bg-indigo-600 text-white rounded-2xl font-black shadow-lg"
-                                        >
-                                            שמור במזווה שלי
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-                        </motion.div>
+                            </div>
+                        )}
                     </div>
-                )}
-            </AnimatePresence>
+                </div>
+            )}
 
             {/* Manual Recipe Modal */}
             <NewRecipeModal

@@ -1,4 +1,5 @@
 "use client";
+export const runtime = 'edge';
 
 
 import { useEffect, useState } from "react";
@@ -15,7 +16,7 @@ import {
     Activity,
     AlertCircle
 } from "lucide-react";
-import { motion } from "framer-motion";
+// Removed framer-motion imports
 import { useRouter } from "next/navigation";
 import { getInventory } from "@/app/actions/inventory";
 import { estimatePercentage, getStatusColor } from "@/lib/consumption";
@@ -130,11 +131,10 @@ export default function ConsumptionAnalytics() {
                                         </span>
                                     </div>
                                     <div className="h-2 w-full bg-slate-50 rounded-full overflow-hidden border border-slate-100">
-                                        <motion.div
-                                            initial={{ width: 0 }}
-                                            animate={{ width: `${pct}%` }}
-                                            className={`h-full rounded-full ${color === 'rose' ? 'bg-rose-500' : color === 'amber' ? 'bg-amber-500' : 'bg-emerald-500'
+                                        <div
+                                            className={`h-full rounded-full transition-all duration-1000 ease-out ${color === 'rose' ? 'bg-rose-500' : color === 'amber' ? 'bg-amber-500' : 'bg-emerald-500'
                                                 }`}
+                                            style={{ width: `${pct}%` }}
                                         />
                                     </div>
                                     <div className="flex justify-between text-[9px] font-bold text-slate-400 uppercase">

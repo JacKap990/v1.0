@@ -1,5 +1,5 @@
 "use client";
-
+export const runtime = 'edge';
 
 import { useEffect, useState } from "react";
 import { getAnalytics, generateSmartConsumptionRates } from "@/app/actions/analytics";
@@ -15,7 +15,6 @@ import {
     ArrowUpRight,
     Loader2
 } from "lucide-react";
-import { motion } from "framer-motion";
 
 export default function AnalyticsPage() {
     const [stats, setStats] = useState<any>(null);
@@ -51,26 +50,8 @@ export default function AnalyticsPage() {
         );
     }
 
-    const container = {
-        hidden: { opacity: 0 },
-        show: {
-            opacity: 1,
-            transition: { staggerChildren: 0.1 }
-        }
-    };
-
-    const item = {
-        hidden: { opacity: 0, y: 20 },
-        show: { opacity: 1, y: 0 }
-    };
-
     return (
-        <motion.div
-            variants={container}
-            initial="hidden"
-            animate="show"
-            className="p-6 space-y-8 pb-32 max-w-md mx-auto"
-        >
+        <div className="p-6 space-y-8 pb-32 max-w-md mx-auto animate-in fade-in duration-500">
             {/* Header */}
             <div>
                 <h1 className="text-3xl font-black tracking-tight text-slate-900">ניתוח נתוני צריכה</h1>
@@ -79,38 +60,38 @@ export default function AnalyticsPage() {
 
             {/* Quick Stats Grid */}
             <div className="grid grid-cols-2 gap-4">
-                <motion.div variants={item} className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden group">
+                <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden group animate-in slide-in-from-bottom-4 duration-300">
                     <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-50 rounded-full -mr-12 -mt-12 transition-transform group-hover:scale-125" />
                     <Package className="w-6 h-6 text-indigo-600 mb-3 relative" />
                     <p className="text-2xl font-black text-slate-900 relative">{stats.totalItems}</p>
                     <p className="text-xs text-slate-500 font-bold uppercase tracking-wider relative">סה"כ מוצרים</p>
-                </motion.div>
+                </div>
 
-                <motion.div variants={item} className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden group">
+                <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden group animate-in slide-in-from-bottom-4 duration-300 delay-75">
                     <div className="absolute top-0 right-0 w-24 h-24 bg-rose-50 rounded-full -mr-12 -mt-12 transition-transform group-hover:scale-125" />
                     <TrendingDown className="w-6 h-6 text-rose-500 mb-3 relative" />
                     <p className="text-2xl font-black text-slate-900 relative">{stats.lowStock}</p>
                     <p className="text-xs text-slate-500 font-bold uppercase tracking-wider relative">מלאי נמוך</p>
-                </motion.div>
+                </div>
 
-                <motion.div variants={item} className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden group">
+                <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden group animate-in slide-in-from-bottom-4 duration-300 delay-100">
                     <div className="absolute top-0 right-0 w-24 h-24 bg-amber-50 rounded-full -mr-12 -mt-12 transition-transform group-hover:scale-125" />
                     <AlertTriangle className="w-6 h-6 text-amber-500 mb-3 relative" />
                     <p className="text-2xl font-black text-slate-900 relative">{stats.expiringSoon}</p>
                     <p className="text-xs text-slate-500 font-bold uppercase tracking-wider relative">פג תוקף בקרוב</p>
-                </motion.div>
+                </div>
 
-                <motion.div variants={item} className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden group">
+                <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden group animate-in slide-in-from-bottom-4 duration-300 delay-150">
                     <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-50 rounded-full -mr-12 -mt-12 transition-transform group-hover:scale-125" />
                     <CheckCircle2 className="w-6 h-6 text-emerald-500 mb-3 relative" />
                     <p className="text-2xl font-black text-slate-900 relative">{Math.round((1 - stats.lowStock / stats.totalItems) * 100)}%</p>
                     <p className="text-xs text-slate-500 font-bold uppercase tracking-wider relative">בריאות המזווה</p>
-                </motion.div>
+                </div>
             </div>
 
             {/* AI Predictions Section */}
             {stats.predictions && stats.predictions.length > 0 && (
-                <motion.div variants={item} className="space-y-4">
+                <div className="space-y-4 animate-in slide-in-from-bottom-4 duration-300 delay-200">
                     <div className="flex items-center gap-2 px-1">
                         <BrainCircuit className="w-5 h-5 text-indigo-600" />
                         <h3 className="font-black text-lg text-slate-800">תחזיות AI</h3>
@@ -129,11 +110,11 @@ export default function AnalyticsPage() {
                             </div>
                         ))}
                     </div>
-                </motion.div>
+                </div>
             )}
 
             {/* Consumption Bars */}
-            <motion.div variants={item} className="space-y-6">
+            <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-300 delay-300">
                 <div className="flex items-center justify-between px-1">
                     <div className="flex items-center gap-2">
                         <TrendingDown className="w-5 h-5 text-indigo-600" />
@@ -172,27 +153,24 @@ export default function AnalyticsPage() {
                                 className="h-2.5 w-full bg-slate-50 rounded-full overflow-hidden"
                                 role="progressbar"
                                 aria-valuenow={i.percentage}
-                                aria-valuemin={0}
                                 aria-valuemax={100}
                                 aria-label={`${i.name} - ${i.percentage}%`}
                             >
-                                <motion.div
-                                    initial={{ width: 0 }}
-                                    animate={{ width: `${i.percentage}%` }}
-                                    transition={{ duration: 1, ease: "easeOut" }}
-                                    className={`h-full rounded-full ${i.percentage <= 20 ? "bg-gradient-to-r from-rose-400 to-rose-500" :
+                                <div
+                                    className={`h-full rounded-full transition-all duration-1000 ease-out ${i.percentage <= 20 ? "bg-gradient-to-r from-rose-400 to-rose-500" :
                                         i.percentage <= 50 ? "bg-gradient-to-r from-amber-400 to-amber-500" :
                                             "bg-gradient-to-r from-emerald-400 to-emerald-500"
                                         }`}
+                                    style={{ width: `${i.percentage}%` }}
                                 />
                             </div>
                         </div>
                     ))}
                 </div>
-            </motion.div>
+            </div>
 
             {/* Category Heatmap (Simplified) */}
-            <motion.div variants={item} className="space-y-4">
+            <div className="space-y-4 animate-in slide-in-from-bottom-4 duration-300 delay-[400ms]">
                 <div className="flex items-center gap-2 px-1">
                     <Calendar className="w-5 h-5 text-indigo-600" />
                     <h3 className="font-black text-lg text-slate-800">התפלגות קטגוריות</h3>
@@ -206,7 +184,7 @@ export default function AnalyticsPage() {
                         </div>
                     ))}
                 </div>
-            </motion.div>
-        </motion.div>
+            </div>
+        </div>
     );
 }

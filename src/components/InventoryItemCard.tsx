@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { Package, Calendar, Tag, ShieldCheck, Factory, Beaker, Clock, Sparkles, Plus } from "lucide-react";
 import { parseUnit, formatQuantity, ensureNormalizedDisplay } from "@/lib/unitConversion";
 import { getCategoryLabel } from "@/lib/localization";
@@ -53,8 +52,7 @@ export function InventoryItemCard({ item, onEdit, onQuantityClick, showStatus = 
     });
 
     return (
-        <motion.div
-            layout
+        <div
             onClick={() => onEdit?.(item)}
             className={`group relative bg-white border border-slate-200/80 rounded-[24px] p-4 flex flex-col gap-3 hover:shadow-xl hover:border-indigo-400/30 transition-all cursor-pointer overflow-hidden mb-1 ${isChecked ? 'opacity-60 bg-slate-50/50' : ''}`}
         >
@@ -143,15 +141,13 @@ export function InventoryItemCard({ item, onEdit, onQuantityClick, showStatus = 
                     </div>
 
                     <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden relative shadow-inner">
-                        <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${percentage}%` }}
-                            transition={{ duration: 1.2, ease: "easeOut" }}
-                            className={`h-full rounded-full ${daysRemaining <= 2 ? 'bg-gradient-to-r from-rose-500 to-rose-700' :
+                        <div
+                            className={`h-full rounded-full transition-all duration-1000 ease-out ${daysRemaining <= 2 ? 'bg-gradient-to-r from-rose-500 to-rose-700' :
                                 statusColor === 'rose' ? 'bg-gradient-to-r from-rose-400 to-rose-600' :
                                     statusColor === 'amber' ? 'bg-gradient-to-r from-amber-400 to-amber-500' :
                                         'bg-gradient-to-r from-emerald-400 to-emerald-500'
                                 }`}
+                            style={{ width: `${percentage}%` }}
                         />
                     </div>
                 </div>
@@ -167,6 +163,6 @@ export function InventoryItemCard({ item, onEdit, onQuantityClick, showStatus = 
                     {new Date(item.expiryDate) < new Date() ? 'expired'.toUpperCase() : new Date(item.expiryDate).toLocaleDateString('he-IL')}
                 </div>
             )}
-        </motion.div>
+        </div>
     );
 }

@@ -1,4 +1,5 @@
 "use client";
+export const runtime = 'edge';
 
 
 import { useState, useEffect } from "react";
@@ -10,7 +11,6 @@ import {
     PlayCircle, ChevronLeft, ChevronRight as ChevronRightIcon,
     Timer, Sparkles
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 import {
     getRecipeById, toggleFavorite, isFavorited, forkRecipe
 } from "@/app/actions/recipes";
@@ -111,7 +111,7 @@ export default function RecipeDetailPage() {
     // COOKING MODE (Step-by-Step Fullscreen)
     if (cookingMode) {
         return (
-            <div className="fixed inset-0 z-[200] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col">
+            <div className="fixed inset-0 z-[200] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col animate-in fade-in duration-300">
                 {/* Top bar */}
                 <div className="p-4 flex items-center justify-between">
                     <button
@@ -128,32 +128,26 @@ export default function RecipeDetailPage() {
                 {/* Progress Bar */}
                 <div className="px-4 mb-8">
                     <div className="h-1 bg-white/10 rounded-full overflow-hidden">
-                        <motion.div
-                            className="h-full bg-emerald-400 rounded-full"
-                            animate={{ width: `${((currentStep + 1) / instructions.length) * 100}%` }}
-                            transition={{ duration: 0.3 }}
+                        <div
+                            className="h-full bg-emerald-400 rounded-full transition-all duration-300 ease-out"
+                            style={{ width: `${((currentStep + 1) / instructions.length) * 100}%` }}
                         />
                     </div>
                 </div>
 
                 {/* Step Content */}
-                <div className="flex-1 flex items-center justify-center px-8">
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={currentStep}
-                            initial={{ opacity: 0, x: -50 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: 50 }}
-                            className="text-center max-w-md"
-                        >
-                            <div className="w-20 h-20 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-8">
-                                <span className="text-4xl font-bold text-emerald-400">{currentStep + 1}</span>
-                            </div>
-                            <p className="text-white text-xl leading-relaxed font-medium">
-                                {instructions[currentStep]}
-                            </p>
-                        </motion.div>
-                    </AnimatePresence>
+                <div className="flex-1 flex items-center justify-center px-8 relative overflow-hidden">
+                    <div
+                        key={currentStep}
+                        className="text-center max-w-md animate-in fade-in slide-in-from-left-4 duration-500"
+                    >
+                        <div className="w-20 h-20 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-8">
+                            <span className="text-4xl font-bold text-emerald-400">{currentStep + 1}</span>
+                        </div>
+                        <p className="text-white text-xl leading-relaxed font-medium">
+                            {instructions[currentStep]}
+                        </p>
+                    </div>
                 </div>
 
                 {/* Navigation */}
@@ -196,7 +190,7 @@ export default function RecipeDetailPage() {
 
     // NORMAL RECIPE VIEW
     return (
-        <div className="pb-24">
+        <div className="pb-24 animate-in fade-in duration-500">
             {/* Hero */}
             <div className="relative h-56 w-full shrink-0">
                 {recipe.image ? (
@@ -292,7 +286,7 @@ export default function RecipeDetailPage() {
                 </div>
 
                 {/* Dietary Transformations */}
-                <div className="flex gap-2 mb-5 overflow-x-auto pb-1">
+                <div className="flex gap-2 mb-5 overflow-x-auto pb-1 no-scrollbar">
                     {[
                         { mode: "vegan" as const, label: "הפוך לטבעוני", emoji: "🌱" },
                         { mode: "vegetarian" as const, label: "הפוך לצמחוני", emoji: "🥚" },

@@ -1,5 +1,5 @@
 "use client";
-
+export const runtime = 'edge';
 
 import { useTheme } from "@/components/ThemeProvider";
 import { useState, useEffect } from "react";
@@ -9,7 +9,6 @@ import {
     User, Check, ChevronLeft, Layout, Camera
 } from "lucide-react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 
 const THEMES = [
     { id: "indigo", name: "אינדיגו", color: "#6366F1" },
@@ -23,7 +22,6 @@ const THEMES = [
 export default function SettingsPage() {
     const { theme, setTheme, colorTheme, setColorTheme, density, setDensity } = useTheme();
 
-    // Local state for non-visual settings with optimistic updates
     const [familySize, setFamilySize] = useState(1);
     const [dietaryTags, setDietaryTags] = useState<string[]>([]);
     const [aiVision, setAiVision] = useState(true);
@@ -93,7 +91,6 @@ export default function SettingsPage() {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        // Resize and convert to base64
         const reader = new FileReader();
         reader.onload = (event) => {
             const img = new Image();
@@ -121,7 +118,6 @@ export default function SettingsPage() {
                 const ctx = canvas.getContext("2d");
                 ctx?.drawImage(img, 0, 0, width, height);
 
-                // Compress to save DB space
                 const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
                 setProfileImage(dataUrl);
                 updateUserSettings({ profileImage: dataUrl });
@@ -134,7 +130,7 @@ export default function SettingsPage() {
     if (isLoading) return <div className="min-h-screen flex items-center justify-center font-black">טוען הגדרות...</div>;
 
     return (
-        <div className="min-h-screen pb-24 dark:bg-slate-950">
+        <div className="min-h-screen pb-24 dark:bg-slate-950 animate-in fade-in duration-500">
             {/* Header */}
             <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-lg border-b border-slate-200 dark:border-slate-800 p-4">
                 <div className="flex items-center gap-4">
@@ -194,11 +190,7 @@ export default function SettingsPage() {
                                     onClick={() => toggleAI(item.id as any)}
                                     className={`w-11 h-6 rounded-full transition-all flex items-center px-1 ${item.active ? 'bg-indigo-600 justify-end' : 'bg-slate-200 dark:bg-slate-700 justify-start'}`}
                                 >
-                                    <motion.div
-                                        layout
-                                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                                        className="w-4 h-4 bg-white rounded-full shadow-sm"
-                                    />
+                                    <div className="w-4 h-4 bg-white rounded-full shadow-sm" />
                                 </button>
                             </div>
                         ))}
@@ -312,10 +304,7 @@ export default function SettingsPage() {
                                             style={{ backgroundColor: t.color }}
                                         >
                                             {colorTheme === t.id && (
-                                                <motion.div
-                                                    layoutId="activeColor"
-                                                    className="absolute inset-0 border-4 border-white dark:border-slate-800 rounded-full shadow-lg"
-                                                />
+                                                <div className="absolute inset-0 border-4 border-white dark:border-slate-800 rounded-full shadow-lg" />
                                             )}
                                             {colorTheme === t.id && <Check className="w-5 h-5 text-white z-10" />}
                                         </div>

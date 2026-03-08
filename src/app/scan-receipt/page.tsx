@@ -1,9 +1,10 @@
 "use client";
+export const runtime = 'edge';
 
 
 import { useState, useRef } from "react";
 import { Camera, Upload, Loader2, PackagePlus, Check, X, ChevronLeft, Receipt } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+// Removed framer-motion imports
 import Link from "next/link";
 import { getCategoryLabel } from "@/lib/localization";
 
@@ -98,7 +99,6 @@ export default function ReceiptScanPage() {
 
     return (
         <div className="p-4 pb-24 min-h-screen">
-            {/* ... keep original rest of return ... */}
             {/* Header */}
             <header className="mb-6">
                 <div className="flex items-center gap-3 mb-2">
@@ -107,7 +107,7 @@ export default function ReceiptScanPage() {
                     </Link>
                     <div className="flex-1">
                         <h1 className="text-2xl font-black text-slate-800 tracking-tight">סריקת קבלה</h1>
-                        <p className="text-xs text-slate-500">צלם קבלה מהסופר והמערכת תזהה את המוצרים</p>
+                        <p className="text-xs text-slate-500">צלם קבלה מהסופר והMערכת תזהה את המוצרים</p>
                     </div>
                     <div className="p-2.5 bg-violet-50 rounded-xl">
                         <Receipt className="w-5 h-5 text-violet-600" />
@@ -117,10 +117,8 @@ export default function ReceiptScanPage() {
 
             {/* Upload Area */}
             {!image && !loading && (
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex flex-col items-center gap-4"
+                <div
+                    className="flex flex-col items-center gap-4 animate-in fade-in slide-in-from-bottom-5 duration-300"
                 >
                     <div
                         onClick={() => fileRef.current?.click()}
@@ -141,15 +139,13 @@ export default function ReceiptScanPage() {
                         onChange={handleFileSelect}
                         className="hidden"
                     />
-                </motion.div>
+                </div>
             )}
 
             {/* Loading State */}
             {loading && !saved && (
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="flex flex-col items-center justify-center py-16 gap-4"
+                <div
+                    className="flex flex-col items-center justify-center py-16 gap-4 animate-in fade-in duration-300"
                 >
                     <div className="relative">
                         <div className="w-20 h-20 bg-violet-100 rounded-full flex items-center justify-center">
@@ -161,7 +157,7 @@ export default function ReceiptScanPage() {
                     </div>
                     <p className="font-bold text-slate-700">מנתח את הקבלה...</p>
                     <p className="text-sm text-slate-400">Gemini AI קורא ומזהה מוצרים</p>
-                </motion.div>
+                </div>
             )}
 
             {/* Error */}
@@ -173,10 +169,8 @@ export default function ReceiptScanPage() {
 
             {/* Results */}
             {products.length > 0 && !saved && (
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="space-y-3"
+                <div
+                    className="space-y-3 animate-in fade-in slide-in-from-bottom-5 duration-300"
                 >
                     <div className="flex items-center justify-between mb-2">
                         <h2 className="font-bold text-slate-700">
@@ -191,16 +185,14 @@ export default function ReceiptScanPage() {
                     </div>
 
                     {products.map((product, i) => (
-                        <motion.div
+                        <div
                             key={i}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: i * 0.05 }}
                             onClick={() => toggleProduct(i)}
-                            className={`flex items-center gap-3 p-4 rounded-2xl border cursor-pointer transition-all ${product.selected
+                            className={`flex items-center gap-3 p-4 rounded-2xl border cursor-pointer transition-all animate-in fade-in slide-in-from-right-5 duration-200 ${product.selected
                                 ? "bg-violet-50 border-violet-200 shadow-sm"
                                 : "bg-slate-50 border-slate-100 opacity-50"
                                 }`}
+                            style={{ animationDelay: `${i * 50}ms`, animationFillMode: 'backwards' }}
                         >
                             <span className="text-2xl">{product.emoji}</span>
                             <div className="flex-1">
@@ -211,7 +203,7 @@ export default function ReceiptScanPage() {
                                 }`}>
                                 {product.selected && <Check className="w-4 h-4" />}
                             </div>
-                        </motion.div>
+                        </div>
                     ))}
 
                     <button
@@ -222,15 +214,13 @@ export default function ReceiptScanPage() {
                         <PackagePlus className="w-5 h-5" />
                         הוסף {products.filter(p => p.selected).length} מוצרים למלאי
                     </button>
-                </motion.div>
+                </div>
             )}
 
             {/* Success */}
             {saved && (
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="text-center py-16"
+                <div
+                    className="text-center py-16 animate-in fade-in zoom-in duration-300"
                 >
                     <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Check className="w-10 h-10 text-emerald-500" />
@@ -248,7 +238,7 @@ export default function ReceiptScanPage() {
                             צפה במלאי
                         </Link>
                     </div>
-                </motion.div>
+                </div>
             )}
         </div>
     );

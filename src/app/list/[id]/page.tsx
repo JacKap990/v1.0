@@ -1,5 +1,5 @@
 "use client";
-
+export const runtime = 'edge';
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
@@ -20,7 +20,7 @@ import {
     ShoppingBag,
     Sparkles
 } from "lucide-react";
-import { motion } from "framer-motion";
+// Removed framer-motion imports
 import Image from "next/image";
 import {
     getShoppingListById,
@@ -362,12 +362,11 @@ export default function ShoppingListDetail() {
                             <h3 className="font-black text-slate-800 text-sm uppercase tracking-wider">{t("smart_suggestions")}</h3>
                         </div>
                         <div className="flex gap-4 overflow-x-auto pb-4 scroll-smooth no-scrollbar">
-                            {recommendations.map((rec) => (
-                                <motion.div
+                            {recommendations.map((rec, i) => (
+                                <div
                                     key={rec.id}
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    className="min-w-[140px] bg-white rounded-3xl p-4 border border-amber-100 shadow-sm flex flex-col items-center text-center gap-2 relative group"
+                                    className="min-w-[140px] bg-white rounded-3xl p-4 border border-amber-100 shadow-sm flex flex-col items-center text-center gap-2 relative group animate-in fade-in zoom-in-95 duration-200"
+                                    style={{ animationDelay: `${i * 50}ms`, animationFillMode: 'backwards' }}
                                 >
                                     <div className="text-3xl mb-1">{rec.emoji || "📦"}</div>
                                     <h4 className="font-bold text-xs text-slate-800 line-clamp-1">{rec.name}</h4>
@@ -378,7 +377,7 @@ export default function ShoppingListDetail() {
                                     >
                                         + {t("add")}
                                     </button>
-                                </motion.div>
+                                </div>
                             ))}
                         </div>
                     </div>
@@ -423,7 +422,7 @@ export default function ShoppingListDetail() {
                                         <InventoryItemCard
                                             item={{
                                                 ...item,
-                                                updatedAt: new Date(),
+                                                updatedAt: new Date().toISOString(),
                                             }}
                                             isChecked={true}
                                             showStatus={false}
@@ -492,7 +491,7 @@ export default function ShoppingListDetail() {
 
             {/* Finish Shopping Button */}
             {completedItems.length > 0 && (
-                <div className="fixed bottom-24 left-4 right-4 z-40 max-w-md mx-auto animate-in slide-in-from-bottom-5">
+                <div className="fixed bottom-24 left-4 right-4 z-40 max-w-md mx-auto animate-in slide-in-from-bottom-5 duration-300">
                     <button
                         onClick={handleFinishShopping}
                         disabled={finishing}

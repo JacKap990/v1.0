@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { X, Plus, Minus, Check } from "lucide-react";
 import { getUnitLabel, estimateConversion } from "@/lib/unitConversion";
-import { motion, AnimatePresence } from "framer-motion";
+// Removed framer-motion imports
 
 type SmartQtyModalProps = {
     isOpen: boolean;
@@ -73,125 +73,113 @@ export function SmartQtyModal({ isOpen, onClose, item, onSave }: SmartQtyModalPr
     };
 
     return (
-        <AnimatePresence>
-            <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
-                {/* Backdrop */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    onClick={onClose}
-                    className="absolute inset-0 bg-slate-900/40 backdrop-blur-md z-0"
-                />
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <div
+                onClick={onClose}
+                className="absolute inset-0 bg-slate-900/40 backdrop-blur-md z-0 animate-in fade-in duration-300"
+            />
 
-                {/* Modal Container */}
-                <motion.div
-                    initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                    animate={{ scale: 1, opacity: 1, y: 0 }}
-                    exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                    role="dialog"
-                    aria-modal="true"
-                    className="relative bg-white/95 backdrop-blur-2xl border border-white/20 shadow-2xl rounded-[40px] w-full max-w-sm overflow-hidden flex flex-col z-10"
-                >
-                    {/* Header with Title */}
-                    <div className="p-6 pb-2 text-center relative">
+            {/* Modal Container */}
+            <div
+                role="dialog"
+                aria-modal="true"
+                className="relative bg-white/95 backdrop-blur-2xl border border-white/20 shadow-2xl rounded-[40px] w-full max-w-sm overflow-hidden flex flex-col z-10 animate-in fade-in zoom-in-95 duration-300"
+            >
+                {/* Header with Title */}
+                <div className="p-6 pb-2 text-center relative">
+                    <button
+                        onClick={onClose}
+                        className="absolute left-6 top-6 p-2 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors text-slate-500"
+                    >
+                        <X className="w-5 h-5" />
+                    </button>
+
+                    <div className="text-4xl mb-3">{item.emoji || "📦"}</div>
+                    <h2 className="text-2xl font-black text-slate-800 leading-tight">{item.name}</h2>
+                    <p className="text-slate-400 text-sm font-bold mt-1">עדכון כמות ויחידות מידה</p>
+                </div>
+
+                {/* Unit Tabs */}
+                <div className="px-6 py-4">
+                    <div className="bg-slate-100/80 p-1 rounded-2xl flex gap-1 overflow-x-auto no-scrollbar">
+                        {getUnitOptions(item.name, item.category).map((u) => (
+                            <button
+                                key={u}
+                                onClick={() => handleUnitChange(u)}
+                                className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all min-w-[60px] ${unit === u
+                                    ? "bg-white text-indigo-600 shadow-sm"
+                                    : "text-slate-400 hover:text-slate-600"
+                                    }`}
+                            >
+                                {getUnitLabel(u)}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Quantity Controls */}
+                <div className="px-8 py-8 flex flex-col items-center">
+                    <div className="flex items-center justify-between w-full mb-8">
                         <button
-                            onClick={onClose}
-                            className="absolute left-6 top-6 p-2 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors text-slate-500"
+                            onClick={() => setQty(Math.max(0, qty - (unit === "יחידות" ? 1 : 0.1)))}
+                            className="w-16 h-16 rounded-[28px] bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-slate-200 transition-colors shadow-sm active:scale-95"
                         >
-                            <X className="w-5 h-5" />
+                            <Minus className="w-8 h-8" />
                         </button>
 
-                        <div className="text-4xl mb-3">{item.emoji || "📦"}</div>
-                        <h2 className="text-2xl font-black text-slate-800 leading-tight">{item.name}</h2>
-                        <p className="text-slate-400 text-sm font-bold mt-1">עדכון כמות ויחידות מידה</p>
-                    </div>
-
-                    {/* Unit Tabs */}
-                    <div className="px-6 py-4">
-                        <div className="bg-slate-100/80 p-1 rounded-2xl flex gap-1 overflow-x-auto no-scrollbar">
-                            {getUnitOptions(item.name, item.category).map((u) => (
-                                <button
-                                    key={u}
-                                    onClick={() => handleUnitChange(u)}
-                                    className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all min-w-[60px] ${unit === u
-                                        ? "bg-white text-indigo-600 shadow-sm"
-                                        : "text-slate-400 hover:text-slate-600"
-                                        }`}
-                                >
-                                    {getUnitLabel(u)}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Quantity Controls */}
-                    <div className="px-8 py-8 flex flex-col items-center">
-                        <div className="flex items-center justify-between w-full mb-8">
-                            <motion.button
-                                whileTap={{ scale: 0.9 }}
-                                onClick={() => setQty(Math.max(0, qty - (unit === "יחידות" ? 1 : 0.1)))}
-                                className="w-16 h-16 rounded-[28px] bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-slate-200 transition-colors shadow-sm"
+                        <div className="flex flex-col items-center">
+                            <span
+                                key={qty}
+                                className="text-6xl font-black text-indigo-700 tabular-nums animate-in fade-in zoom-in duration-200"
                             >
-                                <Minus className="w-8 h-8" />
-                            </motion.button>
-
-                            <div className="flex flex-col items-center">
-                                <motion.span
-                                    key={qty}
-                                    initial={{ scale: 1.2, opacity: 0 }}
-                                    animate={{ scale: 1, opacity: 1 }}
-                                    className="text-6xl font-black text-indigo-700 tabular-nums"
-                                >
-                                    {qty % 1 === 0 ? qty : qty.toFixed(1)}
-                                </motion.span>
-                                <span className="text-slate-400 font-bold uppercase tracking-wider text-xs">
-                                    {getUnitLabel(unit)}
-                                </span >
-                            </div>
-
-                            <motion.button
-                                whileTap={{ scale: 0.9 }}
-                                onClick={() => setQty(qty + (unit === "יחידות" ? 1 : 0.1))}
-                                className="w-16 h-16 rounded-[28px] bg-indigo-50 text-indigo-600 flex items-center justify-center hover:bg-indigo-100 transition-colors shadow-sm"
-                            >
-                                <Plus className="w-8 h-8" />
-                            </motion.button>
+                                {qty % 1 === 0 ? qty : qty.toFixed(1)}
+                            </span>
+                            <span className="text-slate-400 font-bold uppercase tracking-wider text-xs">
+                                {getUnitLabel(unit)}
+                            </span>
                         </div>
 
-                        {/* Presets (Quick Access) */}
-                        <div className="flex gap-3 w-full">
-                            {[0, 0.5, 1, 2].map(p => (
-                                <button
-                                    key={p}
-                                    onClick={() => setQty(p)}
-                                    className="flex-1 py-2 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold text-slate-500 hover:bg-white hover:shadow-md transition-all active:scale-95"
-                                >
-                                    {p === 0 ? "אפס" : p}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Save Button */}
-                    <div className="p-6 pt-0">
                         <button
-                            onClick={handleSave}
-                            disabled={isSaving}
-                            className="w-full h-16 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-[24px] font-black text-lg shadow-xl shadow-indigo-200 flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+                            onClick={() => setQty(qty + (unit === "יחידות" ? 1 : 0.1))}
+                            className="w-16 h-16 rounded-[28px] bg-indigo-50 text-indigo-600 flex items-center justify-center hover:bg-indigo-100 transition-colors shadow-sm active:scale-95"
                         >
-                            {isSaving ? (
-                                <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" />
-                            ) : (
-                                <>
-                                    <span>אישור ועדכון</span>
-                                    <Check className="w-6 h-6" />
-                                </>
-                            )}
+                            <Plus className="w-8 h-8" />
                         </button>
                     </div>
-                </motion.div>
+
+                    {/* Presets (Quick Access) */}
+                    <div className="flex gap-3 w-full">
+                        {[0, 0.5, 1, 2].map(p => (
+                            <button
+                                key={p}
+                                onClick={() => setQty(p)}
+                                className="flex-1 py-2 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold text-slate-500 hover:bg-white hover:shadow-md transition-all active:scale-95"
+                            >
+                                {p === 0 ? "אפס" : p}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Save Button */}
+                <div className="p-6 pt-0">
+                    <button
+                        onClick={handleSave}
+                        disabled={isSaving}
+                        className="w-full h-16 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-[24px] font-black text-lg shadow-xl shadow-indigo-200 flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+                    >
+                        {isSaving ? (
+                            <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" />
+                        ) : (
+                            <>
+                                <span>אישור ועדכון</span>
+                                <Check className="w-6 h-6" />
+                            </>
+                        )}
+                    </button>
+                </div>
             </div>
-        </AnimatePresence>
+        </div>
     );
 }

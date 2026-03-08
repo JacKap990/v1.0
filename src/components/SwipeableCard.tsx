@@ -1,8 +1,7 @@
 "use client";
 
-import { motion, useAnimation, useMotionValue, PanInfo } from "framer-motion";
-import { Trash2, ShoppingCart, Check, Edit2, LucideIcon } from "lucide-react";
-import { useState } from "react";
+import { LucideIcon } from "lucide-react";
+import { useState, useRef } from "react";
 
 interface SwipeAction {
     icon: LucideIcon;
@@ -20,35 +19,59 @@ interface SwipeableCardProps {
 
 export function SwipeableCard({ children, leftAction, rightAction, disabled = false }: SwipeableCardProps) {
     const [isActioning, setIsActioning] = useState(false);
-    const controls = useAnimation();
-    const x = useMotionValue(0);
+    const [offsetX, setOffsetX] = useState(0);
+    const [isDragging, setIsDragging] = useState(false);
 
-    const handleDragEnd = async (e: any, info: PanInfo) => {
+    const startX = useRef(0);
+    const threshold = 50;
+    const actionWidth = 80;
+
+    const handleTouchStart = (e: React.TouchEvent) => {
         if (disabled) return;
-        const threshold = 50;
+        startX.current = e.touches[0].clientX;
+        setIsDragging(true);
+    };
 
-        if (info.offset.x > threshold && leftAction) {
-            controls.start({ x: 80 });
-        } else if (info.offset.x < -threshold && rightAction) {
-            controls.start({ x: -80 });
+    const handleTouchMove = (e: React.TouchEvent) => {
+        if (!isDragging || disabled) return;
+        const currentX = e.touches[0].clientX;
+        const diff = currentX - startX.current;
+
+        // Constrain movement based on available actions
+        let newOffset = diff;
+        if (newOffset > 0 && !leftAction) newOffset = 0;
+        if (newOffset < 0 && !rightAction) newOffset = 0;
+
+        // Resilience/Elastic effect
+        if (Math.abs(newOffset) > actionWidth) {
+            newOffset = (newOffset > 0 ? actionWidth : -actionWidth) + (newOffset - (newOffset > 0 ? actionWidth : -actionWidth)) * 0.2;
+        }
+
+        setOffsetX(newOffset);
+    };
+
+    const handleTouchEnd = () => {
+        if (!isDragging) return;
+        setIsDragging(false);
+
+        if (offsetX > threshold && leftAction) {
+            setOffsetX(actionWidth);
+        } else if (offsetX < -threshold && rightAction) {
+            setOffsetX(-actionWidth);
         } else {
-            controls.start({ x: 0 });
+            setOffsetX(0);
         }
     };
 
     const handleAction = async (action: SwipeAction, direction: number) => {
         setIsActioning(true);
-        // Animate out
-        await controls.start({
-            x: direction * 500,
-            opacity: 0,
-            transition: { duration: 0.2, ease: "easeOut" }
-        });
+        // Animate out (handled by parent removal mostly, but we set state)
+        setOffsetX(direction * 500);
         await action.onClick();
 
-        // If the component wasn't unmounted by the parent, reset it
+        // Reset if still mounted
         setIsActioning(false);
-        controls.set({ x: 0, opacity: 1 });
+        setOffsetX(0);
     };
 
     if (isActioning) return null;
@@ -84,24 +107,17 @@ export function SwipeableCard({ children, leftAction, rightAction, disabled = fa
             )}
 
             {/* Foreground Content Card */}
-            <motion.div
-                className="relative z-10 w-full"
-                drag={disabled ? false : "x"}
-                dragConstraints={{
-                    left: rightAction ? -80 : 0,
-                    right: leftAction ? 80 : 0
-                }}
-                dragElastic={0.2}
-                onDragEnd={handleDragEnd}
-                animate={controls}
-                style={{ x }}
-                whileTap={{ scale: disabled ? 1 : 0.98, cursor: disabled ? "default" : "grabbing" }}
-                transition={{ type: "spring", stiffness: 600, damping: 30 }}
+            <div
+                className={`relative z-10 w-full transition-transform duration-200 ease-out cursor-grab active:cursor-grabbing ${isDragging ? 'transition-none' : ''}`}
+                style={{ transform: `translateX(${offsetX}px)` }}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
             >
                 <div className="bg-white rounded-[24px] overflow-hidden">
                     {children}
                 </div>
-            </motion.div>
+            </div>
         </div>
     );
 }
